@@ -1,0 +1,1 @@
+python smileydroidloco.py RUST_BACKTRACE=1
