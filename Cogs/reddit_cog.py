@@ -19,14 +19,15 @@ class RedditCog(commands.Cog):
         self.refresh_cats()
 
     @commands.command()
-    async def reddit_hot(self, ctx: Context, subreddit: str):
+    async def reddit_hot(self, ctx: Context, subreddit: str, number: int = 10):
         sub: reddit.Subreddit = self.reddit.subreddit(subreddit)
-
-        for post in sub.hot(limit=10):
-            if not post.is_self:  # We only want to work with link posts
+        i = 0
+        for post in sub.hot(limit=100):
+            if not post.is_self and i < number:  # We only want to work with link posts
                 if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
                     slink = post.url
                     await ctx.send(embed=discord.Embed(description=subreddit).set_image(url=slink))
+                    i += 1
 
     @tasks.loop(minutes=30)
     async def update_cat(self):
