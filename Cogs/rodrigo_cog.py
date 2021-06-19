@@ -9,9 +9,17 @@ class RodrigoCog(commands.Cog):
         self.bot = bot
 
     @commands.command()
-    async def rodrigo(self, ctx: Context):
-        self.call_rodrigo.start(ctx)
+    async def rodrigo(self, ctx: Context, user: Member):
+        self.call_rodrigo.start(ctx, user)
+
+    @commands.command()
+    async def rodrigo_rapido(self, ctx: Context, user: Member):
+        self.call_rodrigo_rapido.start(ctx, user)
 
     @tasks.loop(hours=4)
-    async def call_rodrigo(self, ctx):
-        await ctx.send('Rodrigo, abre o server')
+    async def call_rodrigo(self, ctx: Context, user: Member):
+        await ctx.send('<@{}> , abre o server'.format(user.id))
+
+    @tasks.loop(minutes=20)
+    async def call_rodrigo_rapido(self, ctx: Context, user: Member):
+        await ctx.send('<@{}> , abre o server'.format(user.id))
