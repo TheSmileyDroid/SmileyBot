@@ -16,7 +16,7 @@ class RedditCog(commands.Cog):
         self.bot = bot
         self.reddit: praw.Reddit = praw.Reddit(client_id='515a_Gyt37LPJA',
                                                client_secret='xS9hlckXGF_w0WqaM6SV5muhMFQmXg', user_agent='SmileyDroidLoco')
-        self.refresh_cats()
+        self.update_cat.start()
 
     @commands.command()
     async def reddit_hot(self, ctx: Context, subreddit: str, number: int = 10):
@@ -29,11 +29,8 @@ class RedditCog(commands.Cog):
                     await ctx.send(embed=discord.Embed(description=subreddit).set_image(url=slink))
                     i += 1
 
-    @tasks.loop(minutes=30)
+    @tasks.loop(minutes=20)
     async def update_cat(self):
-        self.refresh_cats()
-
-    def refresh_cats(self):
         cats.clear()
         for subreddit in subreddits:
             sub: reddit.Subreddit = self.reddit.subreddit(subreddit)
