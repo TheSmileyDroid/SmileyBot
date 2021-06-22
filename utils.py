@@ -2,7 +2,7 @@ from typing import Union
 from discord.voice_client import VoiceClient
 import discord
 
-voice_clients: list[discord.VoiceClient] = []
+voice_clients: list = []
 
 
 def is_connected(voice_channel: discord.VoiceChannel) -> Union[bool, discord.VoiceClient]:
