@@ -10,8 +10,9 @@ if __name__ == '__main__':
     bot.add_cog(falar_cog.FalarCog)
     bot.add_cog(tocar_audio_cog.TocarCog)
     bot.add_cog(reddit_cog.RedditCog)
-    #bot.add_cog(rodrigo_cog.RodrigoCog)
+    bot.add_cog(rodrigo_cog.RodrigoCog)
 
+    #Mantenha o bot rodando
     keep_alive()
     # Connect
     bot.run(os.environ['DISCORD_ID'])

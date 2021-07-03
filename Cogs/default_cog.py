@@ -54,4 +54,11 @@ class DefaultCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
-        pass
+        if member.name == 'SmileyDroidLoco':
+          if after.mute == True:
+            await member.edit(mute=False)
+    
+    @commands.command()
+    async def print_guild_info(self, ctx: Context):
+        print("{}, canais: {}, canais de voz: {}".format(ctx.guild, ctx.guild.channels, ctx.guild.voice_channels))
+
