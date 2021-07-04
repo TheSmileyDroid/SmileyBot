@@ -14,7 +14,7 @@ if __name__ == '__main__':
     bot.add_cog(cassino_cog.CassinoCog)
 
     # Mantenha o bot rodando
-    # keep_alive()
+    keep_alive()
     # Connect
     #print(os.environ['DISCORD_ID'])
     bot.run(os.environ['DISCORD_ID'])

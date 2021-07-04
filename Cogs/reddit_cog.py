@@ -3,8 +3,8 @@ import discord
 from discord import *
 from discord.ext import tasks, commands
 from discord.ext.commands.context import Context
-import asyncpraw as praw
-from asyncpraw import reddit
+import praw
+from praw import reddit
 
 subreddits = ['cats', ]  # 'aww', ]  # , 'CuteAnimals']
 
@@ -20,9 +20,9 @@ class RedditCog(commands.Cog):
 
     @commands.command()
     async def reddit_hot(self, ctx: Context, subreddit: str, number: int = 10):
-        sub: reddit.Subreddit = await self.reddit.subreddit(subreddit)
+        sub: reddit.Subreddit = self.reddit.subreddit(subreddit)
         i = 0
-        async for post in sub.hot(limit=100):
+        for post in sub.hot(limit=100):
             if not post.is_self and i < number:  # We only want to work with link posts
                 if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
                     slink = post.url
@@ -33,9 +33,9 @@ class RedditCog(commands.Cog):
     async def update_cat(self):
         cats.clear()
         for subreddit in subreddits:
-            sub: reddit.Subreddit = await self.reddit.subreddit(subreddit)
+            sub: reddit.Subreddit = self.reddit.subreddit(subreddit)
 
-            async for post in sub.hot(limit=170):
+            for post in sub.hot(limit=170):
                 if not post.is_self:  # We only want to work with link posts
                     if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
                         cats.append(post)
