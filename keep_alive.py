@@ -1,7 +1,7 @@
-from flask import Flask
+import flask
 from threading import Thread
 
-app = Flask('')
+app = flask.Flask('')
 
 @app.route('/')
 def home():

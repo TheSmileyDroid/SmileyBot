@@ -1,5 +1,5 @@
 import asyncio
-from gtts.tts import gTTS
+import gtts
 from utils import get_voice_client
 import discord
 from discord import *
@@ -20,7 +20,7 @@ class FalarCog(commands.Cog):
         txt = ''
         for t in text:
           txt += t + ' '
-        tts = gTTS(text=txt, lang="pt-br", slow=False)
+        tts = gtts.tts.gTTS(text=txt, lang="pt-br", slow=False)
 
         tts.save("cache/audio.mp3")
 
@@ -37,7 +37,7 @@ class FalarCog(commands.Cog):
         #    return
         voice = await get_voice_client(ctx, channel)
 
-        tts = gTTS(text=text, lang=lang, slow=False)
+        tts = gtts.tts.gTTS(text=text, lang=lang, slow=False)
 
         tts.save("cache/audio.mp3")
 
@@ -51,7 +51,7 @@ class FalarCog(commands.Cog):
     async def n(self, ctx: Context, channel: str = None, lang: str = "pt-br"):
         voice = await get_voice_client(ctx, channel)
 
-        tts = gTTS(text="não", lang=lang, slow=False)
+        tts = gtts.tts.gTTS(text="não", lang=lang, slow=False)
 
         tts.save("audio.mp3")
 
@@ -64,7 +64,7 @@ class FalarCog(commands.Cog):
     async def s(self, ctx: Context, channel: str = None, lang: str = "pt-br"):
         voice = await get_voice_client(ctx, channel)
 
-        tts = gTTS(text="sim", lang=lang, slow=False)
+        tts = gtts.tts.gTTS(text="sim", lang=lang, slow=False)
 
         tts.save("audio.mp3")
 
