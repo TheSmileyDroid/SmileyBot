@@ -44,7 +44,7 @@ class FalarCog(commands.Cog):
         voice.play(discord.FFmpegPCMAudio("cache/audio.mp3"))
 
         while voice.is_playing():
-            await asyncio.sleep(1)
+            await asyncio.sleep(10)
         voice.stop()
       
     @commands.command()
@@ -73,4 +73,4 @@ class FalarCog(commands.Cog):
         while voice.is_playing():
             await asyncio.sleep(1)
         voice.stop()
-      
+    
