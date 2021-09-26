@@ -149,6 +149,8 @@ class TocarCog(commands.Cog):
         #    ctx, channel)
 
         if ctx.voice_client is not None and ctx.voice_client.is_connected():
+            players.clear()
+            ctx.voice_client.stop()
             await ctx.voice_client.disconnect()
             await ctx.message.add_reaction('✅')
         else:
@@ -157,7 +159,7 @@ class TocarCog(commands.Cog):
     @play.before_invoke
     @stream.before_invoke
     async def ensure_voice(self, ctx):
-        if ctx.voice_client is None or ctx.voice_client.is_connected():
+        if ctx.voice_client is None or not ctx.voice_client.is_connected():
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
                 print("Conectou")
