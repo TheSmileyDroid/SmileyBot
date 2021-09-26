@@ -8,10 +8,6 @@ from discord.ext import commands
 from discord.ext.commands.context import Context
 import youtube_dl
 
-global loop
-loop = False
-
-players = []
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -34,7 +30,6 @@ ffmpeg_options = {
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
-
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -59,20 +54,30 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
 
 
+loop = False
+players = []
+current: YTDLSource = None
 
 class TocarCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     def next_music(self, ctx: Context):
-        print('ctx.guild: {}'.format(ctx.guild))
-        def err(e):
-            print('Player error: %s' % e) if e else None
-            print('err -> ctx.guild: {}'.format(ctx.guild))
-            self.next_music(ctx)
-        if len(players) > 0:
-            print('Próxima música')
-            ctx.voice_client.play(players.pop(0), after=err)
+        global loop
+        global current
+        if not loop:
+            def err(e):
+                print('Player error: %s' % e) if e else None
+                self.next_music(ctx)
+            if len(players) > 0:
+                c = players.pop(0)
+                ctx.voice_client.play(c, after=err)
+                current = c
+        else:
+            def err(e):
+                print('Player error: %s' % e) if e else None
+                self.next_music(ctx)
+            ctx.voice_client.play(current, after=err)
             
     
     @commands.command()
@@ -85,14 +90,14 @@ class TocarCog(commands.Cog):
 
     @commands.command()
     async def play(self, ctx: Context, url: str, channel: str = None):
-        global loop
-
+        global current
         async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=loop)
+            player = await YTDLSource.from_url(url)
             if not ctx.voice_client.is_playing():
                 def err(e):
                     print('Player error: %s' % e) if e else None
                     self.next_music(ctx)
+                current = player
                 ctx.voice_client.play(player, after=err)
                 await ctx.send('Tocando: {}'.format(player.title))
             else:
@@ -105,13 +110,16 @@ class TocarCog(commands.Cog):
     
     @commands.command()
     async def stream(self, ctx: Context, url: str, channel: str = None):
-        global loop
-
+        global current
         async with ctx.typing():
-            player = await YTDLSource.from_url(url, loop=loop, stream=True)
-            ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-            
-            await ctx.send('Tocando: {}'.format(player.title))
+            player = await YTDLSource.from_url(url, stream=True)
+            if not ctx.voice_client.is_playing():
+                ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+                current = player
+                await ctx.send('Tocando: {}'.format(player.title))
+            else:
+                players.append(player)
+                await ctx.send('{} adicionada na fila'.format(player.title))
 
     @commands.command()
     async def loop(self, ctx: Context):
@@ -135,12 +143,11 @@ class TocarCog(commands.Cog):
         if ctx.author.name != "SmileyDroid" :
             await ctx.author.send('Você não é o sorriso, você é {}'.format(ctx.author.name))
             return
-        voice_channel, connected, client = get_voice_channel_and_status(
-            ctx, channel)
+        # voice_channel, connected, client = get_voice_channel_and_status(
+        #    ctx, channel)
 
-        if connected:
-            await client.disconnect()
-            voice_clients.remove(client)
+        if ctx.voice_client != None:
+            await ctx.voice_client.disconnect()
             await ctx.message.add_reaction('✅')
         else:
             await ctx.send("Não estou conectado")
