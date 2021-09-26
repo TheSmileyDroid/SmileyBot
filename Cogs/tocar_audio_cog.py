@@ -56,7 +56,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 loop = False
 players = []
-current = []
+current = None
 
 class TocarCog(commands.Cog):
     def __init__(self, bot):
@@ -77,7 +77,7 @@ class TocarCog(commands.Cog):
             def err(e):
                 print('Player error: %s' % e) if e else None
                 self.next_music(ctx)
-            ctx.voice_client.play(current[0], after=err)
+            ctx.voice_client.play(current, after=err)
             
     
     @commands.command()
@@ -97,7 +97,7 @@ class TocarCog(commands.Cog):
                 def err(e):
                     print('Player error: %s' % e) if e else None
                     self.next_music(ctx)
-                current[0] = player
+                current = player
                 ctx.voice_client.play(player, after=err)
                 await ctx.send('Tocando: {}'.format(player.title))
             else:
@@ -115,7 +115,7 @@ class TocarCog(commands.Cog):
             player = await YTDLSource.from_url(url, stream=True)
             if not ctx.voice_client.is_playing():
                 ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-                current[0] = player
+                current = player
                 await ctx.send('Tocando: {}'.format(player.title))
             else:
                 players.append(player)
