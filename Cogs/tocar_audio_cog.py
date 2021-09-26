@@ -56,7 +56,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
 loop = False
 players = []
-current: YTDLSource = None
+current = []
 
 class TocarCog(commands.Cog):
     def __init__(self, bot):
@@ -72,17 +72,16 @@ class TocarCog(commands.Cog):
             if len(players) > 0:
                 c = players.pop(0)
                 ctx.voice_client.play(c, after=err)
-                current = c
+                current[0] = c
         else:
             def err(e):
                 print('Player error: %s' % e) if e else None
                 self.next_music(ctx)
-            ctx.voice_client.play(current, after=err)
+            ctx.voice_client.play(current[0], after=err)
             
     
     @commands.command()
     async def queue(self, ctx: Context):
-        
         text = ''
         for player in players:
             text += '{}\n'.format(player.title)
@@ -97,7 +96,7 @@ class TocarCog(commands.Cog):
                 def err(e):
                     print('Player error: %s' % e) if e else None
                     self.next_music(ctx)
-                current = player
+                current[0] = player
                 ctx.voice_client.play(player, after=err)
                 await ctx.send('Tocando: {}'.format(player.title))
             else:
@@ -115,7 +114,7 @@ class TocarCog(commands.Cog):
             player = await YTDLSource.from_url(url, stream=True)
             if not ctx.voice_client.is_playing():
                 ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
-                current = player
+                current[0] = player
                 await ctx.send('Tocando: {}'.format(player.title))
             else:
                 players.append(player)
@@ -135,6 +134,7 @@ class TocarCog(commands.Cog):
     @commands.command()
     async def stop(self, ctx: Context, channel: str = None):
         players.clear()
+        current.clear()
         ctx.voice_client.stop()
         await ctx.message.add_reaction('✅')
 
@@ -146,7 +146,7 @@ class TocarCog(commands.Cog):
         # voice_channel, connected, client = get_voice_channel_and_status(
         #    ctx, channel)
 
-        if ctx.voice_client != None:
+        if ctx.voice_client != None and ctx.voice_client.is_connected():
             await ctx.voice_client.disconnect()
             await ctx.message.add_reaction('✅')
         else:
