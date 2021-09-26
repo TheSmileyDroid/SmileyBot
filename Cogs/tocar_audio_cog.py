@@ -1,9 +1,5 @@
 import asyncio
-from re import L
-from gtts.tts import gTTS
-from utils import get_voice_channel_and_status, get_voice_client, voice_clients
 import discord
-from discord import *
 from discord.ext import commands
 from discord.ext.commands.context import Context
 import youtube_dl
@@ -22,7 +18,7 @@ ytdl_format_options = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0' # bind to ipv4 since ipv6 addresses cause issues sometimes
+    'source_address': '0.0.0.0'  # bind to ipv4
 }
 
 ffmpeg_options = {
@@ -30,6 +26,7 @@ ffmpeg_options = {
 }
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
+
 
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -39,24 +36,26 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         self.title = data.get('title')
         self.url = data.get('url')
-        
 
     @classmethod
     async def from_url(cls, url, *, loop=False, stream=False, ctx=None):
         loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-        
+        data = await loop.run_in_executor(
+                    None, lambda: ytdl.extract_info(url, download=not stream))
+
         if 'entries' in data:
             # take first item from a playlist
             data = data['entries'][0]
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+        return cls(discord.FFmpegPCMAudio(filename,
+                                          **ffmpeg_options), data=data)
 
 
 loop = False
 players = []
 current = None
+
 
 class TocarCog(commands.Cog):
     def __init__(self, bot):
@@ -65,21 +64,22 @@ class TocarCog(commands.Cog):
     def next_music(self, ctx: Context):
         global loop
         global current
-        if not loop:
-            def err(e):
-                print('Player error: %s' % e) if e else None
-                self.next_music(ctx)
-            if len(players) > 0:
-                c = players.pop(0)
-                ctx.voice_client.play(c, after=err)
-                current[0] = c
-        else:
-            def err(e):
-                print('Player error: %s' % e) if e else None
-                self.next_music(ctx)
-            ctx.voice_client.play(current, after=err)
-            
-    
+
+        def err(e):
+            print('Player error: %s' % e) if e else None
+            self.next_music(ctx)
+        if len(players) > 0:
+            c = players.pop(0)
+            ctx.voice_client.play(c, after=err)
+            current[0] = c
+        # if not loop:
+
+        # else:
+        #    def err(e):
+        #        print('Player error: %s' % e) if e else None
+        #        self.next_music(ctx)
+        #    ctx.voice_client.play(current, after=err)
+
     @commands.command()
     async def queue(self, ctx: Context):
         text = ''
@@ -103,18 +103,19 @@ class TocarCog(commands.Cog):
             else:
                 players.append(player)
                 await ctx.send('{} adicionada na fila'.format(player.title))
-    
+
     @commands.command()
     async def skip(self, ctx: Context):
         ctx.voice_client.stop()
-    
+
     @commands.command()
     async def stream(self, ctx: Context, url: str, channel: str = None):
         global current
         async with ctx.typing():
             player = await YTDLSource.from_url(url, stream=True)
             if not ctx.voice_client.is_playing():
-                ctx.voice_client.play(player, after=lambda e: print('Player error: %s' % e) if e else None)
+                ctx.voice_client.play(player, after=lambda e: print(
+                    'Player error: %s' % e) if e else None)
                 current = player
                 await ctx.send('Tocando: {}'.format(player.title))
             else:
@@ -130,29 +131,29 @@ class TocarCog(commands.Cog):
             await ctx.send('Música em Looping')
         else:
             await ctx.send('Não está mais em Looping')
-        
 
     @commands.command()
     async def stop(self, ctx: Context, channel: str = None):
         players.clear()
-        current.clear()
         ctx.voice_client.stop()
         await ctx.message.add_reaction('✅')
 
     @commands.command()
     async def leave(self, ctx: Context, channel: str = None):
-        if ctx.author.name != "SmileyDroid" :
-            await ctx.author.send('Você não é o sorriso, você é {}'.format(ctx.author.name))
+        if ctx.author.name != "SmileyDroid":
+            await ctx.author.send(
+                'Você não é o sorriso, você é {}'.format(ctx.author.name)
+                )
             return
         # voice_channel, connected, client = get_voice_channel_and_status(
         #    ctx, channel)
 
-        if ctx.voice_client != None and ctx.voice_client.is_connected():
+        if ctx.voice_client is not None and ctx.voice_client.is_connected():
             await ctx.voice_client.disconnect()
             await ctx.message.add_reaction('✅')
         else:
             await ctx.send("Não estou conectado")
-    
+
     @play.before_invoke
     @stream.before_invoke
     async def ensure_voice(self, ctx):
@@ -161,5 +162,6 @@ class TocarCog(commands.Cog):
                 await ctx.author.voice.channel.connect()
                 print("Conectou")
             else:
-                await ctx.send("You are not connected to a voice channel.")
-                raise commands.CommandError("Author not connected to a voice channel.")
+                await ctx.send("Você não está conectado a um canal de voz")
+                raise commands.CommandError(
+                    "Author not connected to a voice channel.")
