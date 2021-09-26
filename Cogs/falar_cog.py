@@ -66,7 +66,7 @@ class FalarCog(commands.Cog):
     @falar.before_invoke
     @s.before_invoke
     @n.before_invoke
-    async def ensure_voice(self, ctx):
+    async def voice(self, ctx):
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()

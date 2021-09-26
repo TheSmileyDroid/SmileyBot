@@ -90,6 +90,7 @@ class TocarCog(commands.Cog):
     @commands.command()
     async def play(self, ctx: Context, url: str, channel: str = None):
         global current
+        print("starting playing")
         async with ctx.typing():
             player = await YTDLSource.from_url(url)
             if not ctx.voice_client.is_playing():
@@ -155,9 +156,10 @@ class TocarCog(commands.Cog):
     @play.before_invoke
     @stream.before_invoke
     async def ensure_voice(self, ctx):
-        if ctx.voice_client is None:
+        if ctx.voice_client is None or ctx.voice_client.is_connected():
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
+                print("Conectou")
             else:
                 await ctx.send("You are not connected to a voice channel.")
                 raise commands.CommandError("Author not connected to a voice channel.")
