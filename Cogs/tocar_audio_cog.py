@@ -88,7 +88,7 @@ class TocarCog(commands.Cog):
         await ctx.send(text)
 
     @commands.command()
-    async def play(self, ctx: Context, url: str, channel: str = None):
+    async def play(self, ctx: Context, *, url: str):
         global current
         print("starting playing")
         async with ctx.typing():
