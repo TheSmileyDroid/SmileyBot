@@ -91,7 +91,7 @@ class TocarCog(commands.Cog):
         global current
         print("starting playing")
         async with ctx.typing():
-            player = await YTDLSource.from_url(url, stream=True)
+            player = await YTDLSource.from_url(url)
             if not isinstance(player, list):
                 if not ctx.voice_client.is_playing():
                     def err(e):
