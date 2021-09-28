@@ -92,7 +92,7 @@ class TocarCog(commands.Cog):
         print("starting playing")
         async with ctx.typing():
             player = await YTDLSource.from_url(url)
-            if player is not list:
+            if not isinstance(player, list):
                 if not ctx.voice_client.is_playing():
                     def err(e):
                         print('Player error: %s' % e) if e else None
@@ -106,7 +106,7 @@ class TocarCog(commands.Cog):
                         '{} adicionada na fila'.format(player.title))
             else:
                 i = 0
-                for p in players:
+                for p in player:
                     if not ctx.voice_client.is_playing() and i == 0:
                         def err(e):
                             print('Player error: %s' % e) if e else None
