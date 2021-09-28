@@ -155,14 +155,6 @@ class TocarCog(commands.Cog):
 
     @commands.command()
     async def leave(self, ctx: Context, channel: str = None):
-        if ctx.author.name != "SmileyDroid":
-            await ctx.author.send(
-                'Você não é o sorriso, você é {}'.format(ctx.author.name)
-                )
-            return
-        # voice_channel, connected, client = get_voice_channel_and_status(
-        #    ctx, channel)
-
         if ctx.voice_client is not None and ctx.voice_client.is_connected():
             players.clear()
             ctx.voice_client.stop()
