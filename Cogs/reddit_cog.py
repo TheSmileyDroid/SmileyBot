@@ -11,11 +11,13 @@ subreddits = ['cats', ]  # 'aww', ]  # , 'CuteAnimals']
 cats = []
 
 
-class RedditCog(commands.Cog):
+class Reddit(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.reddit: asyncpraw.Reddit = asyncpraw.Reddit(client_id='515a_Gyt37LPJA',
-                                               client_secret='xS9hlckXGF_w0WqaM6SV5muhMFQmXg', user_agent='SmileyDroidLoco')
+        self.reddit: asyncpraw.Reddit = asyncpraw.Reddit(
+            client_id='515a_Gyt37LPJA',
+            client_secret='xS9hlckXGF_w0WqaM6SV5muhMFQmXg',
+            user_agent='SmileyDroidLoco')
         self.update_cat.start()
 
     @commands.command()
@@ -23,7 +25,7 @@ class RedditCog(commands.Cog):
         sub: reddit.Subreddit = await self.reddit.subreddit(subreddit)
         i = 0
         async for post in sub.hot(limit=100):
-            if not post.is_self and i < number:  # We only want to work with link posts
+            if not post.is_self and i < number:
                 if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
                     slink = post.url
                     await ctx.send(embed=discord.Embed(description=subreddit).set_image(url=slink))
@@ -39,7 +41,7 @@ class RedditCog(commands.Cog):
                 if not post.is_self:  # We only want to work with link posts
                     if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
                         cats.append(post)
-        print('Gatos atualizados')
+        print('[INFO] Gatos atualizados')
 
     @commands.command()
     async def cat(self, ctx: Context):

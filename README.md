@@ -1,3 +1,3 @@
 # SmileyDroid
 
-A bot for discord with many functions
+A bot for discord with many functions. 

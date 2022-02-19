@@ -1,10 +1,9 @@
-import discord
-from discord import *
+from discord import Member, VoiceChannel, VoiceState
 from discord.ext import commands
 from discord.ext.commands.context import Context
 
 
-class DefaultCog(commands.Cog):
+class Basic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -29,36 +28,41 @@ class DefaultCog(commands.Cog):
         if ctx.author.name == "SmileyDroid":
             await user.edit(mute=True)
         else:
-            await ctx.send('Você não é o sorriso, você é {}'.format(ctx.author.name))
+            await ctx.send('Você não é o sorriso, você é {}'
+                           .format(ctx.author.name))
 
     @commands.command()
     async def unmute(self, ctx: Context, user: Member):
         if ctx.author.name == "SmileyDroid":
             await user.edit(mute=False)
         else:
-            await ctx.send('Você não é o sorriso, você é {}'.format(ctx.author.name))
+            await ctx.send('Você não é o sorriso, você é {}'
+                           .format(ctx.author.name))
 
     @commands.command()
     async def deaf(self, ctx: Context, user: Member):
         if ctx.author.name == "SmileyDroid":
             await user.edit(deafen=True)
         else:
-            await ctx.send('Você não é o sorriso, você é {}'.format(ctx.author.name))
+            await ctx.send('Você não é o sorriso, você é {}'
+                           .format(ctx.author.name))
 
     @commands.command()
     async def undeaf(self, ctx: Context, user: Member):
         if ctx.author.name == "SmileyDroid":
             await user.edit(deafen=False)
         else:
-            await ctx.send('Você não é o sorriso, você é {}'.format(ctx.author.name))
+            await ctx.send('Você não é o sorriso, você é {}'
+                           .format(ctx.author.name))
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member: Member, before: VoiceState, after: VoiceState):
+    async def on_voice_state_update(self, member: Member,
+                                    before: VoiceState, after: VoiceState):
         if member.name == 'SmileyDroidLoco':
-          if after.mute == True:
-            await member.edit(mute=False)
-    
+            if after.mute:
+                await member.edit(mute=False)
+
     @commands.command()
     async def print_guild_info(self, ctx: Context):
-        print("{}, canais: {}, canais de voz: {}".format(ctx.guild, ctx.guild.channels, ctx.guild.voice_channels))
-
+        print("{}, canais: {}, canais de voz: {}"
+              .format(ctx.guild, ctx.guild.channels, ctx.guild.voice_channels))

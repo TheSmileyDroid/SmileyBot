@@ -4,13 +4,13 @@ from discord.ext import commands
 from discord.ext.commands.context import Context
 
 
-class FalarCog(commands.Cog):
+class Falar(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-
+    
     @commands.command()
     async def f(self, ctx: Context, *, text: str):
-
+        
         tts = gtts.tts.gTTS(text=text, lang="pt-br", slow=False)
 
         tts.save("cache/audio.mp3")
