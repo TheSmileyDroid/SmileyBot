@@ -81,14 +81,13 @@ class Audio(commands.Cog):
             print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
             player = await YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
             ctx.voice_client.play(
-                        player, after=lambda e: asyncio.create_task((self.play_next(ctx, e))))
+                        player[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
             self.current_player[str(ctx.guild.id)] = player
         elif len(self.players[str(ctx.guild.id)]) >= 0:
             if not ctx.voice_client.is_playing():
                 player = self.players[str(ctx.guild.id)].pop(0)
-                loop = asyncio.get_event_loop()
                 ctx.voice_client.play(
-                    player, after=lambda e: loop.run_until_complete((self.play_next(ctx, e))))
+                    player, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
                 self.current_player[str(ctx.guild.id)] = player
         else:
             self.current_player[str(ctx.guild.id)] = None
@@ -104,7 +103,7 @@ class Audio(commands.Cog):
                 f'[INFO] Tocando {format(music.title)} ({ctx.guild}[{ctx.guild.id}])')
             if not ctx.voice_client.is_playing():
                 ctx.voice_client.play(
-                    music, after=lambda e: asyncio.create_task((self.play_next(ctx, e))))
+                    music, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
                 self.current_player[str(ctx.guild.id)] = music
             if not ctx.voice_client.is_playing():
                 await ctx.send(f'Tocando **{music.title}**!!!!')
