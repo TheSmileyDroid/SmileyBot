@@ -75,6 +75,7 @@ class Audio(commands.Cog):
     def play_next(self, ctx: Context, e=None):
         print(
             f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])') if e else None
+        
         if self.loopings[str(ctx.guild.id)] and self.current_player[str(ctx.guild.id)] is not None:
             print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
             player = YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
@@ -93,7 +94,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def play(self, ctx: Context, url: str):
         '''Toca uma música de uma URL'''
-        musics = await YTDLSource.from_url(url, ctx=ctx)
+        musics = await YTDLSource.from_url(url)
         music = musics[0]
 
         if self.current_player[str(ctx.guild.id)] is None:
