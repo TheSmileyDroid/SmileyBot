@@ -105,7 +105,6 @@ class Audio(commands.Cog):
                 ctx.voice_client.play(
                     music, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
                 self.current_player[str(ctx.guild.id)] = music
-            if not ctx.voice_client.is_playing():
                 await ctx.send(f'Tocando **{music.title}**!!!!')
         else:
             print(
