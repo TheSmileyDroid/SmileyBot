@@ -1,6 +1,5 @@
 import random
 import discord
-from discord import *
 from discord.ext import tasks, commands
 from discord.ext.commands.context import Context
 import asyncpraw

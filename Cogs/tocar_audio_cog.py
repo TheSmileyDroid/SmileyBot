@@ -1,8 +1,7 @@
-import asyncio
 import discord
+import youtube_dl
 from discord.ext import commands
 from discord.ext.commands.context import Context
-import youtube_dl
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -61,7 +60,7 @@ class Audio(commands.Cog):
         self.current_player: dict[str, YTDLSource] = {}
         self.players: dict[str, list[YTDLSource]] = {}
         self.loopings: dict[str, bool] = {}
-    
+
     @commands.Cog.listener()
     async def on_ready(self):
         '''Inicia o bot de audio'''
@@ -76,12 +75,12 @@ class Audio(commands.Cog):
     async def play_next(self, ctx: Context, e=None):
         print(
             f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])') if e else None
-        
+
         if self.loopings[str(ctx.guild.id)] and self.current_player[str(ctx.guild.id)] is not None:
             print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
             player = await YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
             ctx.voice_client.play(
-                        player[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+                player[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
             self.current_player[str(ctx.guild.id)] = player[0]
         elif len(self.players[str(ctx.guild.id)]) >= 0:
             if not ctx.voice_client.is_playing():
@@ -150,7 +149,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def loop(self, ctx: Context):
         '''Repete a música atual'''
-        
+
         self.loopings[str(ctx.guild.id)] = not self.loopings[str(ctx.guild.id)]
 
         await ctx.send(
