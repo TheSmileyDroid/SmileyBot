@@ -1,3 +1,4 @@
+import asyncio
 import discord
 from discord.ext import commands
 from discord.ext.commands.context import Context
@@ -72,21 +73,23 @@ class Audio(commands.Cog):
             print(f'[Audio] Iniciado em {guild.name}[{guild.id}]')
         print('[Audio] Pronto!')
 
-    def play_next(self, ctx: Context, e=None):
+    async def play_next(self, ctx: Context, e=None):
         print(
             f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])') if e else None
         
         if self.loopings[str(ctx.guild.id)] and self.current_player[str(ctx.guild.id)] is not None:
             print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
-            player = YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
+            player = await YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
+            loop = asyncio.get_event_loop()
             ctx.voice_client.play(
-                        player, after=lambda e: self.play_next(ctx, e))
+                        player, after=lambda e: loop.run_until_complete((self.play_next(ctx, e))))
             self.current_player[str(ctx.guild.id)] = player
         elif len(self.players[str(ctx.guild.id)]) >= 0:
             if not ctx.voice_client.is_playing():
                 player = self.players[str(ctx.guild.id)].pop(0)
+                loop = asyncio.get_event_loop()
                 ctx.voice_client.play(
-                    player, after=lambda e: self.play_next(ctx, e))
+                    player, after=lambda e: loop.run_until_complete((self.play_next(ctx, e))))
                 self.current_player[str(ctx.guild.id)] = player
         else:
             self.current_player[str(ctx.guild.id)] = None
@@ -101,8 +104,9 @@ class Audio(commands.Cog):
             print(
                 f'[INFO] Tocando {format(music.title)} ({ctx.guild}[{ctx.guild.id}])')
             if not ctx.voice_client.is_playing():
+                loop = asyncio.get_event_loop()
                 ctx.voice_client.play(
-                    music, after=lambda e: self.play_next(ctx, e))
+                    music, after=lambda e: loop.run_until_complete((self.play_next(ctx, e))))
                 self.current_player[str(ctx.guild.id)] = music
             if not ctx.voice_client.is_playing():
                 await ctx.send(f'Tocando **{music.title}**!!!!')
