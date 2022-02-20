@@ -6,6 +6,10 @@ from discord.ext.commands.context import Context
 class Basic(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
+    
+    @commands.command()
+    async def connect_to_voice(self, ctx: Context):
+        await ctx.author.voice.channel.connect()
 
     @commands.Cog.listener()
     async def on_ready(self):
