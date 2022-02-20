@@ -86,6 +86,7 @@ class Audio(commands.Cog):
         elif len(self.players[str(ctx.guild.id)]) >= 0:
             if not ctx.voice_client.is_playing():
                 player = self.players[str(ctx.guild.id)].pop(0)
+                player = (await YTDLSource.from_url(player.url))[0]
                 ctx.voice_client.play(
                     player, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
                 self.current_player[str(ctx.guild.id)] = player

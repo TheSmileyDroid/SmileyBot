@@ -4,6 +4,7 @@ from discord.ext.commands.context import Context
 
 
 class Basic(commands.Cog):
+    '''Usado para testes'''
     def __init__(self, bot):
         self.bot = bot
     

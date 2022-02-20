@@ -19,3 +19,4 @@ if __name__ == '__main__':
     
     # Connect
     bot.run(os.environ['DISCORD_ID'])
+
