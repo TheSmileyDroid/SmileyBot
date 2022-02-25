@@ -13,5 +13,5 @@ class BotBuilder():
     def remove_cog(self, cog_name: str):
         self.bot.remove_cog(cog_name)
 
-    def run(self, id: str):
-        self.bot.run(id)
+    def run(self, idx: str):
+        self.bot.run(idx)

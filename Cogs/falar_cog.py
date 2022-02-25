@@ -14,24 +14,24 @@ class Falar(commands.Cog):
         tts = gtts.tts.gTTS(text=text, lang="pt-br", slow=False)
 
         tts.save("cache/audio.mp3")
-
-        ctx.voice_client.play(discord.FFmpegPCMAudio("cache/audio.mp3"))
+        if isinstance(ctx.voice_client, discord.VoiceClient):
+            ctx.voice_client.play(discord.FFmpegPCMAudio("cache/audio.mp3"))
 
     @commands.command()
-    async def n(self, ctx: Context, channel: str = None, lang: str = "pt-br"):
+    async def n(self, ctx: Context, lang: str = "pt-br"):
         tts = gtts.tts.gTTS(text="não", lang=lang, slow=False)
 
-        tts.save("audio.mp3")
-
-        ctx.voice_client.play(discord.FFmpegPCMAudio("audio.mp3"))
+        tts.save("cache/audio.mp3")
+        if isinstance(ctx.voice_client, discord.VoiceClient):
+            ctx.voice_client.play(discord.FFmpegPCMAudio("cache/audio.mp3"))
 
     @commands.command()
-    async def s(self, ctx: Context, channel: str = None, lang: str = "pt-br"):
+    async def s(self, ctx: Context, lang: str = "pt-br"):
         tts = gtts.tts.gTTS(text="sim", lang=lang, slow=False)
 
-        tts.save("audio.mp3")
-
-        ctx.voice_client.play(discord.FFmpegPCMAudio("audio.mp3"))
+        tts.save("cache/audio.mp3")
+        if isinstance(ctx.voice_client, discord.VoiceClient):
+            ctx.voice_client.play(discord.FFmpegPCMAudio("cache/audio.mp3"))
 
     @f.before_invoke
     @s.before_invoke

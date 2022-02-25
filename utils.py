@@ -5,7 +5,7 @@ import discord
 voice_clients: list = []
 
 
-def is_connected(voice_channel: discord.VoiceChannel) -> Union[bool, discord.VoiceClient]:
+def is_connected(voice_channel: discord.VoiceChannel) -> Union[bool, Union[VoiceClient, None]]:
     for client in voice_clients:
         if client.channel == voice_channel:
             return True, client

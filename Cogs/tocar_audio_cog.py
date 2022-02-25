@@ -36,29 +36,37 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = self.data.get('url')
 
     @classmethod
-    async def from_url(cls, url) -> list:
+    async def from_url(cls, url: str) -> list:
         '''Returns a list of YTDLSource objects from a URL'''
 
         initial_data = ytdl.extract_info(url, download=False)
-        sources = []
-        if 'entries' in initial_data:
-            for entry in initial_data['entries']:
-                filename = entry['url']
-                sources.append(cls(discord.FFmpegPCMAudio(filename,
-                               **ffmpeg_options), data=entry))
-            return sources
-        else:
-            filename = initial_data['url']
-            sources.append(cls(discord.FFmpegPCMAudio(
-                filename, **ffmpeg_options), data=initial_data))
-            return sources
+        if isinstance(initial_data, dict):
+            sources = []
+            if 'entries' in initial_data:
+                for entry in initial_data['entries']:
+                    filename = entry['url']
+                    sources.append(cls(discord.FFmpegPCMAudio(filename,
+                                **ffmpeg_options), data=entry))
+                return sources
+            else:
+                filename = initial_data['url']
+                sources.append(cls(discord.FFmpegPCMAudio(
+                    filename, **ffmpeg_options), data=initial_data))
+                return sources
+        return []
 
+class Music():
+    url: str = ''
+    title: str = ''
+    
+    def __str__(self) -> str:
+        return f'{self.title}'
 
 class Audio(commands.Cog):
     def __init__(self, bot: discord.Client):
         self.bot = bot
-        self.current_player: dict[str, YTDLSource] = {}
-        self.players: dict[str, list[YTDLSource]] = {}
+        self.current_player: dict[str, Music] = {} # {url: str, title: str}
+        self.players: dict[str, list[Music]] = {}
         self.loopings: dict[str, bool] = {}
 
     @commands.Cog.listener()
@@ -66,96 +74,108 @@ class Audio(commands.Cog):
         '''Inicia o bot de audio'''
         print('[Audio] Iniciando...')
         for guild in self.bot.guilds:
-            self.current_player[str(guild.id)] = None
+            self.current_player[str(guild.id)] = Music()
             self.players[str(guild.id)] = []
             self.loopings[str(guild.id)] = False
             print(f'[Audio] Iniciado em {guild.name}[{guild.id}]')
         print('[Audio] Pronto!')
 
     async def play_next(self, ctx: Context, e=None):
-        print(
-            f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])') if e else None
-
-        if self.loopings[str(ctx.guild.id)] and self.current_player[str(ctx.guild.id)] is not None:
-            print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
-            player = await YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
-            ctx.voice_client.play(
-                player[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
-            self.current_player[str(ctx.guild.id)] = player[0]
-        elif len(self.players[str(ctx.guild.id)]) >= 0:
-            if not ctx.voice_client.is_playing():
-                player = self.players[str(ctx.guild.id)].pop(0)
-                player = (await YTDLSource.from_url(player.url))[0]
+        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+            print(
+                f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])') if e else None
+            if self.loopings[str(ctx.guild.id)]:
+                print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
+                player = await YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
                 ctx.voice_client.play(
-                    player, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
-                self.current_player[str(ctx.guild.id)] = player
-        else:
-            self.current_player[str(ctx.guild.id)] = None
+                    player[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+            elif len(self.players[str(ctx.guild.id)]) > 0:
+                if not ctx.voice_client.is_playing():
+                    player = self.players[str(ctx.guild.id)].pop(0)
+                    ctx.voice_client.play(
+                        (await YTDLSource.from_url(player.url))[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+                    self.current_player[str(ctx.guild.id)] = player
+            else:
+                self.current_player[str(ctx.guild.id)].url = ''
+                self.current_player[str(ctx.guild.id)].title = ''
 
     @commands.command()
     async def play(self, ctx: Context, url: str):
         '''Toca uma música de uma URL'''
-        musics = await YTDLSource.from_url(url)
-        music = musics[0]
+        musics: list[YTDLSource] = await YTDLSource.from_url(url)
+        music: YTDLSource = musics[0]
 
-        if self.current_player[str(ctx.guild.id)] is None:
-            print(
-                f'[INFO] Tocando {format(music.title)} ({ctx.guild}[{ctx.guild.id}])')
-            if not ctx.voice_client.is_playing():
-                ctx.voice_client.play(
-                    music, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
-                self.current_player[str(ctx.guild.id)] = music
-                await ctx.send(f'Tocando **{music.title}**!!!!')
-        else:
-            print(
-                f'[INFO] **{format(musics[0].title)}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])')
-            self.players[str(ctx.guild.id)].append(music)
-            await ctx.send(f'**{musics[0].title}** adicionado a fila')
+        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+            if self.current_player[str(ctx.guild.id)].url == '':
+                print(
+                    f'[INFO] Tocando {format(music.title)} ({ctx.guild}[{ctx.guild.id}])')
+                if not ctx.voice_client.is_playing():
+                    ctx.voice_client.play(
+                        music, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+                    self.current_player[str(ctx.guild.id)].url = music.url
+                    self.current_player[str(ctx.guild.id)].title = format(music.title)
+                    await ctx.send(f'Tocando **{music.title}**!!!!')
+            else:
+                print(
+                    f'[INFO] **{format(musics[0].title)}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])')
+                music_data = Music()
+                music_data.title = music.title
+                music_data.url = music.url
+                self.players[str(ctx.guild.id)].append(music_data)
+                await ctx.send(f'**{musics[0].title}** adicionado a fila')
 
-        for i in range(1, len(musics)):
-            self.players[str(ctx.guild.id)].append(musics[i])
+            for i in range(1, len(musics)):
+                music_data: Music = Music()
+                music_data.url = musics[i].url
+                music_data.title = musics[i].title
+                self.players[str(ctx.guild.id)].append(music_data)
+                print(
+                    f'[INFO] **{music_data.title}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])')
+                await ctx.send(f'**{music_data.title}** adicionada a fila')
 
     @commands.command()
     async def stop(self, ctx: Context):
         '''Para de tocar'''
-        ctx.voice_client.stop()
-        self.players[str(ctx.guild.id)] = []
-        self.current_player[str(ctx.guild.id)] = None
-        await ctx.send('Musica parada!')
+        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+            ctx.voice_client.stop()
+            self.players[str(ctx.guild.id)] = []
+            self.current_player[str(ctx.guild.id)].url = ''
+            self.current_player[str(ctx.guild.id)].title = ''
+            await ctx.send('Musica parada!')
 
     @commands.command()
     async def queue(self, ctx: Context):
         '''Mostra a fila de músicas'''
-        if self.current_player[str(ctx.guild.id)] is not None:
-            text = f'**Musica atual: {self.current_player[str(ctx.guild.id)].title}**\n\n'
-            text += 'Fila:\n'
-            for music in self.players[str(ctx.guild.id)]:
-                if music.title is not None:
-                    text += f'__{format(music.title)}__\n'
-            await ctx.send(text)
-        else:
-            await ctx.send('Não há músicas na fila!')
+        if isinstance(ctx.guild, discord.Guild):
+            if self.current_player[str(ctx.guild.id)] != '':
+                text = f'**Musica atual: {self.current_player[str(ctx.guild.id)].title}**\n\n'
+                text += 'Fila:\n'
+                for music in self.players[str(ctx.guild.id)]:
+                    text += f'__{music}__\n'
+                await ctx.send(text)
+            else:
+                await ctx.send('Não há músicas na fila!')
 
     @commands.command()
     async def skip(self, ctx: Context):
         '''Pula a música atual'''
-        if self.current_player[str(ctx.guild.id)] is None:
-            await ctx.send('Não há nada tocando')
-            return
-        ctx.voice_client.stop()
-
+        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+            if self.current_player[str(ctx.guild.id)].url == '':
+                await ctx.send('Não há nada tocando')
+                return
+            ctx.voice_client.stop()
         await ctx.send('Música pulada!')
 
     @commands.command()
     async def loop(self, ctx: Context):
         '''Repete a música atual'''
+        if isinstance(ctx.guild, discord.Guild):
+            self.loopings[str(ctx.guild.id)] = not self.loopings[str(ctx.guild.id)]
 
-        self.loopings[str(ctx.guild.id)] = not self.loopings[str(ctx.guild.id)]
-
-        await ctx.send(
-            'Música sendo repetida!'
-            if self.loopings[str(ctx.guild.id)]
-            else 'Música não está mais sendo repetida!')
+            await ctx.send(
+                'Música sendo repetida!'
+                if self.loopings[str(ctx.guild.id)]
+                else 'Música não está mais sendo repetida!')
 
     @play.before_invoke
     @stop.before_invoke
