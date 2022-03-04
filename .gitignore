@@ -1,7 +1,7 @@
 venv
 *.pyc
+*.mp3
 staticfiles
 .env
 db.sqlite3
 youtube-*
-cache/audio.mp3

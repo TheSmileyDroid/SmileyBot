@@ -4,8 +4,9 @@ from discord.ext import commands
 
 
 class BotBuilder():
+
     def __init__(self):
-        self.bot: discord.Client = commands.Bot(command_prefix="%")
+        self.bot: commands.Bot = commands.Bot(command_prefix="%")
 
     def add_cog(self, cog: Type[commands.Cog]):
         self.bot.add_cog(cog(self.bot))

@@ -5,12 +5,13 @@ from discord.ext.commands.context import Context
 
 
 class Falar(commands.Cog):
+
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command()
     async def f(self, ctx: Context, *, text: str):
-        
+
         tts = gtts.tts.gTTS(text=text, lang="pt-br", slow=False)
 
         tts.save("cache/audio.mp3")
@@ -41,8 +42,7 @@ class Falar(commands.Cog):
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
             else:
-                await ctx.send(
-                    "Você não está conectado em um canal de voz")
+                await ctx.send("Você não está conectado em um canal de voz")
                 raise commands.CommandError(
                     "Author not connected to a voice channel.")
         else:

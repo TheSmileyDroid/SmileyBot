@@ -19,14 +19,13 @@ ytdl_format_options = {
     'source_address': '0.0.0.0'  # bind to ipv4
 }
 
-ffmpeg_options = {
-    'options': '-vn'
-}
+ffmpeg_options = {'options': '-vn'}
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
+
     def __init__(self, source, *, data, volume=0.5):
         super().__init__(source, volume)
 
@@ -45,27 +44,32 @@ class YTDLSource(discord.PCMVolumeTransformer):
             if 'entries' in initial_data:
                 for entry in initial_data['entries']:
                     filename = entry['url']
-                    sources.append(cls(discord.FFmpegPCMAudio(filename,
-                                **ffmpeg_options), data=entry))
+                    sources.append(
+                        cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options),
+                            data=entry))
                 return sources
             else:
                 filename = initial_data['url']
-                sources.append(cls(discord.FFmpegPCMAudio(
-                    filename, **ffmpeg_options), data=initial_data))
+                sources.append(
+                    cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options),
+                        data=initial_data))
                 return sources
         return []
+
 
 class Music():
     url: str = ''
     title: str = ''
-    
+
     def __str__(self) -> str:
         return f'{self.title}'
 
+
 class Audio(commands.Cog):
+
     def __init__(self, bot: discord.Client):
         self.bot = bot
-        self.current_player: dict[str, Music] = {} # {url: str, title: str}
+        self.current_player: dict[str, Music] = {}  # {url: str, title: str}
         self.players: dict[str, list[Music]] = {}
         self.loopings: dict[str, bool] = {}
 
@@ -81,19 +85,25 @@ class Audio(commands.Cog):
         print('[Audio] Pronto!')
 
     async def play_next(self, ctx: Context, e=None):
-        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
-            print(
-                f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])') if e else None
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
+            print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
+                  ) if e else None
             if self.loopings[str(ctx.guild.id)]:
                 print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
-                player = await YTDLSource.from_url(self.current_player[str(ctx.guild.id)].url)
+                player = await YTDLSource.from_url(self.current_player[str(
+                    ctx.guild.id)].url)
                 ctx.voice_client.play(
-                    player[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+                    player[0],
+                    after=lambda e: self.bot.loop.create_task(
+                        (self.play_next(ctx, e))))
             elif len(self.players[str(ctx.guild.id)]) > 0:
                 if not ctx.voice_client.is_playing():
                     player = self.players[str(ctx.guild.id)].pop(0)
                     ctx.voice_client.play(
-                        (await YTDLSource.from_url(player.url))[0], after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+                        (await YTDLSource.from_url(player.url))[0],
+                        after=lambda e: self.bot.loop.create_task(
+                            (self.play_next(ctx, e))))
                     self.current_player[str(ctx.guild.id)] = player
             else:
                 self.current_player[str(ctx.guild.id)].url = ''
@@ -105,19 +115,25 @@ class Audio(commands.Cog):
         musics: list[YTDLSource] = await YTDLSource.from_url(url)
         music: YTDLSource = musics[0]
 
-        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == '':
                 print(
-                    f'[INFO] Tocando {format(music.title)} ({ctx.guild}[{ctx.guild.id}])')
+                    f'[INFO] Tocando {format(music.title)} ({ctx.guild}[{ctx.guild.id}])'
+                )
                 if not ctx.voice_client.is_playing():
                     ctx.voice_client.play(
-                        music, after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))))
+                        music,
+                        after=lambda e: self.bot.loop.create_task(
+                            (self.play_next(ctx, e))))
                     self.current_player[str(ctx.guild.id)].url = music.url
-                    self.current_player[str(ctx.guild.id)].title = format(music.title)
+                    self.current_player[str(ctx.guild.id)].title = format(
+                        music.title)
                     await ctx.send(f'Tocando **{music.title}**!!!!')
             else:
                 print(
-                    f'[INFO] **{format(musics[0].title)}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])')
+                    f'[INFO] **{format(musics[0].title)}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])'
+                )
                 music_data = Music()
                 music_data.title = music.title
                 music_data.url = music.url
@@ -130,13 +146,15 @@ class Audio(commands.Cog):
                 music_data.title = musics[i].title
                 self.players[str(ctx.guild.id)].append(music_data)
                 print(
-                    f'[INFO] **{music_data.title}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])')
+                    f'[INFO] **{music_data.title}** adicionado a fila ({ctx.guild}[{ctx.guild.id}])'
+                )
                 await ctx.send(f'**{music_data.title}** adicionada a fila')
 
     @commands.command()
     async def stop(self, ctx: Context):
         '''Para de tocar'''
-        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
             ctx.voice_client.stop()
             self.players[str(ctx.guild.id)] = []
             self.current_player[str(ctx.guild.id)].url = ''
@@ -159,7 +177,8 @@ class Audio(commands.Cog):
     @commands.command()
     async def skip(self, ctx: Context):
         '''Pula a música atual'''
-        if isinstance(ctx.guild, discord.Guild) and isinstance(ctx.voice_client, discord.VoiceClient):
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == '':
                 await ctx.send('Não há nada tocando')
                 return
@@ -170,12 +189,11 @@ class Audio(commands.Cog):
     async def loop(self, ctx: Context):
         '''Repete a música atual'''
         if isinstance(ctx.guild, discord.Guild):
-            self.loopings[str(ctx.guild.id)] = not self.loopings[str(ctx.guild.id)]
+            self.loopings[str(
+                ctx.guild.id)] = not self.loopings[str(ctx.guild.id)]
 
-            await ctx.send(
-                'Música sendo repetida!'
-                if self.loopings[str(ctx.guild.id)]
-                else 'Música não está mais sendo repetida!')
+            await ctx.send('Música sendo repetida!' if self.loopings[str(
+                ctx.guild.id)] else 'Música não está mais sendo repetida!')
 
     @play.before_invoke
     @stop.before_invoke
@@ -185,8 +203,7 @@ class Audio(commands.Cog):
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()
             else:
-                await ctx.send(
-                    "Você não está conectado em um canal de voz")
+                await ctx.send("Você não está conectado em um canal de voz")
                 raise commands.CommandError(
                     "Author not connected to a voice channel.")
         else:

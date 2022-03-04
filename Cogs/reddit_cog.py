@@ -5,12 +5,15 @@ from discord.ext.commands.context import Context
 import asyncpraw
 from asyncpraw import reddit
 
-subreddits = ['cats', ]  # 'aww', ]  # , 'CuteAnimals']
+subreddits = [
+    'cats',
+]  # 'aww', ]  # , 'CuteAnimals']
 
 cats = []
 
 
 class Reddit(commands.Cog):
+
     def __init__(self, bot):
         self.bot = bot
         self.reddit: asyncpraw.Reddit = asyncpraw.Reddit(
@@ -25,9 +28,11 @@ class Reddit(commands.Cog):
         i = 0
         async for post in sub.hot(limit=100):
             if not post.is_self and i < number:
-                if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
+                if post.url.endswith("jpg") or post.url.endswith(
+                        "jpeg") or post.url.endswith("png"):
                     slink = post.url
-                    await ctx.send(embed=discord.Embed(description=subreddit).set_image(url=slink))
+                    await ctx.send(embed=discord.Embed(
+                        description=subreddit).set_image(url=slink))
                     i += 1
 
     @tasks.loop(minutes=20)
@@ -38,11 +43,13 @@ class Reddit(commands.Cog):
 
             async for post in sub.hot(limit=170):
                 if not post.is_self:  # We only want to work with link posts
-                    if post.url.endswith("jpg") or post.url.endswith("jpeg") or post.url.endswith("png"):
+                    if post.url.endswith("jpg") or post.url.endswith(
+                            "jpeg") or post.url.endswith("png"):
                         cats.append(post)
         print('[INFO] Gatos atualizados')
 
     @commands.command()
     async def cat(self, ctx: Context):
         post = random.choice(cats)
-        await ctx.send(embed=discord.Embed(description=post.subreddit).set_image(url=post.url))
+        await ctx.send(embed=discord.Embed(
+            description=post.subreddit).set_image(url=post.url))

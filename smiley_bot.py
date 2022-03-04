@@ -1,7 +1,6 @@
 import os
 from bot_builder import BotBuilder
-from Cogs import (default_cog, tocar_audio_cog,
-                  reddit_cog, falar_cog)
+from Cogs import (default_cog, tocar_audio_cog, reddit_cog, falar_cog)
 # , cassino_cog, falar_cog
 from keep_alive import keep_alive
 
@@ -16,6 +15,6 @@ if __name__ == '__main__':
 
     # Keep the bot running
     keep_alive()
-    
+
     # Connect
     bot.run(os.environ['DISCORD_ID'])
