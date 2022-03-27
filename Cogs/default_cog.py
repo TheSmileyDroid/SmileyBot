@@ -31,3 +31,24 @@ class Basic(commands.Cog):
     @commands.command()
     async def list_voice_channels(self, ctx: Context):
         await ctx.send()
+
+    @commands.command()
+    async def stay_awake(self, ctx: Context, half: int):
+        '''Esse comando serve para manter o bot acordado por um tempo (em meia horas)'''
+
+        # For each half hour in the half variable, a request will be sent to the link https://smiley-droid-bot.herokuapp.com/
+        import requests
+        import threading
+        from time import sleep
+
+        requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
+
+        def keep_alive():
+            for i in range(half):
+                # Sleep for 25 minutes
+                sleep(60 * 25)
+                requests.get('https://smiley-droid-bot.herokuapp.com/',
+                             timeout=1000)
+
+        thread = threading.Thread(target=keep_alive)
+        thread.start()
