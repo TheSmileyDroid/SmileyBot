@@ -33,7 +33,7 @@ class Basic(commands.Cog):
         await ctx.send()
 
     @commands.command()
-    async def stay_awake(self, ctx: Context, half: int):
+    async def stay(self, ctx: Context, half: int = 0):
         '''Esse comando serve para manter o bot acordado por um tempo (em meia horas)'''
 
         # For each half hour in the half variable, a request will be sent to the link https://smiley-droid-bot.herokuapp.com/
@@ -42,6 +42,7 @@ class Basic(commands.Cog):
         from time import sleep
 
         requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
+        ctx.send('Estou acordado!')
 
         def keep_alive():
             for i in range(half):
@@ -49,6 +50,7 @@ class Basic(commands.Cog):
                 sleep(60 * 25)
                 requests.get('https://smiley-droid-bot.herokuapp.com/',
                              timeout=1000)
+                ctx.send('Estou acordado!')
 
         thread = threading.Thread(target=keep_alive)
         thread.start()
