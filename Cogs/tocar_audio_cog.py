@@ -1,3 +1,4 @@
+import random
 import discord
 import youtube_dl
 from discord.ext import commands
@@ -168,8 +169,8 @@ class Audio(commands.Cog):
             if self.current_player[str(ctx.guild.id)] != '':
                 text = f'**Musica atual: {self.current_player[str(ctx.guild.id)].title}**\n\n'
                 text += 'Fila:\n'
-                for music in self.players[str(ctx.guild.id)]:
-                    text += f'__{music}__\n'
+                for i, music in enumerate(self.players[str(ctx.guild.id)]):
+                    text += f' {i}. __{music}__\n'
                 await ctx.send(text)
             else:
                 await ctx.send('Não há músicas na fila!')
@@ -194,6 +195,52 @@ class Audio(commands.Cog):
 
             await ctx.send('Música sendo repetida!' if self.loopings[str(
                 ctx.guild.id)] else 'Música não está mais sendo repetida!')
+
+    @commands.command()
+    async def pause(self, ctx: Context):
+        '''Pausa a música atual'''
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
+            if ctx.voice_client.is_playing():
+                ctx.voice_client.pause()
+                await ctx.send('Música pausada!')
+            else:
+                await ctx.send('Não há nada tocando!')
+
+    @commands.command()
+    async def resume(self, ctx: Context):
+        '''Resume a música atual'''
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
+            if ctx.voice_client.is_paused():
+                ctx.voice_client.resume()
+                await ctx.send('Música resumida!')
+            else:
+                await ctx.send('Não há nada pausado!')
+
+    @commands.command()
+    async def suffle(self, ctx: Context):
+        '''Embaralha a fila de músicas'''
+        if isinstance(ctx.guild, discord.Guild):
+            random.shuffle(self.players[str(ctx.guild.id)])
+            await ctx.send('Fila embaralhada!')
+
+    @commands.command()
+    async def remove(self, ctx: Context, index: int):
+        '''Remove uma música da fila'''
+        if isinstance(ctx.guild, discord.Guild):
+            if index > len(self.players[str(ctx.guild.id)]) - 1:
+                await ctx.send('Index inválido!')
+                return
+            self.players[str(ctx.guild.id)].pop(index)
+            await ctx.send('Música removida!')
+
+    @commands.command()
+    async def clear(self, ctx: Context):
+        '''Limpa a fila de músicas'''
+        if isinstance(ctx.guild, discord.Guild):
+            self.players[str(ctx.guild.id)] = []
+            await ctx.send('Fila limpa!')
 
     @play.before_invoke
     @stop.before_invoke
