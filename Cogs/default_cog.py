@@ -42,7 +42,7 @@ class Basic(commands.Cog):
         from time import sleep
 
         requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
-        ctx.send('Estou acordado!')
+        await ctx.send('Estou acordado!')
 
         def keep_alive():
             for i in range(half):
