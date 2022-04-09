@@ -44,13 +44,16 @@ class Basic(commands.Cog):
         requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
         await ctx.send('Estou acordado!')
 
-        def keep_alive():
+        async def keep_alive():
             for i in range(half):
                 # Sleep for 25 minutes
                 sleep(60 * 25)
                 requests.get('https://smiley-droid-bot.herokuapp.com/',
                              timeout=1000)
-                ctx.send('Estou acordado!')
+                await ctx.send('Estou acordado!')
 
-        thread = threading.Thread(target=keep_alive)
-        thread.start()
+        try:
+            thread = threading.Thread(target=keep_alive)
+            thread.start()
+        except Exception as e:
+            await ctx.send(f'Não foi possível iniciar o stay!\n{e}')
