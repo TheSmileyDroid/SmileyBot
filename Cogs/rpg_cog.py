@@ -1,5 +1,6 @@
 # RPG Cog
 
+from unittest import result
 import discord
 from discord.ext import commands
 
@@ -27,7 +28,8 @@ class RPG(commands.Cog):
             await ctx.send('O formato deve ser NdN!')
             return
 
-        result = ', '.join(str(random.randint(1, limit)) for r in range(rolls))
+        numbers = [str(random.randint(1, limit)) for r in range(rolls)]
+        result = ', '.join(numbers) + ' = ' + str(sum(int(n) for n in numbers))
         await ctx.send(result)
 
     @commands.command()
