@@ -13,7 +13,7 @@ class RPG(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command()
+    @commands.command(name='roll', aliases=['r', 'dado', 'd'])
     async def roll(self, ctx, *, args):
         """Rolls a dice in NdN format."""
         try:
