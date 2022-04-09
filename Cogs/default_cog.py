@@ -1,3 +1,4 @@
+import asyncio
 from discord import Member, VoiceChannel
 from discord.ext import commands
 from discord.ext.commands.context import Context
@@ -44,13 +45,17 @@ class Basic(commands.Cog):
         requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
         await ctx.send('Estou acordado!')
 
-        async def keep_alive():
+        def keep_alive():
+
+            async def send_msg():
+                await ctx.send('Estou acordado!')
+
             for i in range(half):
                 # Sleep for 25 minutes
                 sleep(60 * 25)
                 requests.get('https://smiley-droid-bot.herokuapp.com/',
                              timeout=1000)
-                await ctx.send('Estou acordado!')
+                asyncio.run_coroutine_threadsafe(send_msg(), self.bot.loop)
 
         try:
             thread = threading.Thread(target=keep_alive)

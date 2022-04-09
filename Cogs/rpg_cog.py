@@ -45,6 +45,6 @@ class RPG(commands.Cog):
         await ctx.send(random.choice(choices))
 
     @commands.command()
-    async def ficha(self, ctx, *, args):
-        """Creates a character sheet."""
-        await ctx.send('A ficha não está disponível no momento.')
+    async def ficha(self, ctx):
+        """Shows your character sheet."""
+        await ctx.send('')
