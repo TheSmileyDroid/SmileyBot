@@ -29,7 +29,7 @@ class RPG(commands.Cog):
             return
 
         numbers = [str(random.randint(1, limit)) for r in range(rolls)]
-        result = ((', '.join(numbers) + ' = ') if len(numbers) > 0 else
+        result = ((', '.join(numbers) + ' = ') if len(numbers) > 1 else
                   '') + str(sum(int(n) for n in numbers))
         await ctx.send(result)
 
