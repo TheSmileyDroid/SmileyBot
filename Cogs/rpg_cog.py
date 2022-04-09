@@ -29,7 +29,8 @@ class RPG(commands.Cog):
             return
 
         numbers = [str(random.randint(1, limit)) for r in range(rolls)]
-        result = ', '.join(numbers) + ' = ' + str(sum(int(n) for n in numbers))
+        result = ((', '.join(numbers) + ' = ') if len(numbers) > 0 else
+                  '') + str(sum(int(n) for n in numbers))
         await ctx.send(result)
 
     @commands.command()
