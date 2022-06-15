@@ -43,21 +43,18 @@ class Basic(commands.Cog):
         from time import sleep
 
         requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
-        await ctx.send('Estou acordado!')
+        # await ctx.send('Estou acordado!')
 
         def keep_alive():
-
-            async def send_msg():
-                await ctx.send('Estou acordado!')
-
             for i in range(half):
                 # Sleep for 25 minutes
-                sleep(60 * 25)
+                sleep(60 * 20)
                 requests.get('https://smiley-droid-bot.herokuapp.com/',
                              timeout=1000)
-                asyncio.run_coroutine_threadsafe(send_msg(), self.bot.loop)
 
         try:
+            if half >= 24:
+                raise Exception('O tempo não pode ser maior que 8 horas')
             thread = threading.Thread(target=keep_alive)
             thread.start()
         except Exception as e:
