@@ -182,7 +182,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def skip(self, ctx: Context):
         '''Pula a música atual'''
-        self.skips[str(ctx.guild.id)] = False
+        self.skip[str(ctx.guild.id)] = False
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == '':
