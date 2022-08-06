@@ -73,6 +73,7 @@ class Audio(commands.Cog):
         self.current_player: dict[str, Music] = {}  # {url: str, title: str}
         self.players: dict[str, list[Music]] = {}
         self.loopings: dict[str, bool] = {}
+        self.skip: dict[str, bool] = {}
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -82,6 +83,7 @@ class Audio(commands.Cog):
             self.current_player[str(guild.id)] = Music()
             self.players[str(guild.id)] = []
             self.loopings[str(guild.id)] = False
+            self.skip[str(guild.id)] = False
             print(f'[Audio] Iniciado em {guild.name}[{guild.id}]')
         print('[Audio] Pronto!')
 
@@ -90,7 +92,7 @@ class Audio(commands.Cog):
                 ctx.voice_client, discord.VoiceClient):
             print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
                   ) if e else None
-            if self.loopings[str(ctx.guild.id)]:
+            if self.loopings[str(ctx.guild.id)] and not self.skip[str(ctx.guild.id)]:
                 print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
                 player = await YTDLSource.from_url(self.current_player[str(
                     ctx.guild.id)].url)
@@ -106,9 +108,11 @@ class Audio(commands.Cog):
                         after=lambda e: self.bot.loop.create_task(
                             (self.play_next(ctx, e))))
                     self.current_player[str(ctx.guild.id)] = player
+                    self.skips[str(ctx.guild.id)] = False
             else:
                 self.current_player[str(ctx.guild.id)].url = ''
                 self.current_player[str(ctx.guild.id)].title = ''
+                self.skips[str(ctx.guild.id)] = False
 
     @commands.command()
     async def play(self, ctx: Context, url: str):
@@ -178,6 +182,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def skip(self, ctx: Context):
         '''Pula a música atual'''
+        self.skips[str(ctx.guild.id)] = False
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == '':
