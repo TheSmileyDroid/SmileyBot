@@ -38,6 +38,7 @@ class Falar(commands.Cog):
     @s.before_invoke
     @n.before_invoke
     async def voice(self, ctx):
+        '''Conecta o bot ao canal de voz'''
         if ctx.voice_client is None:
             if ctx.author.voice:
                 await ctx.author.voice.channel.connect()

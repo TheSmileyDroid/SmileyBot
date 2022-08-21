@@ -1,4 +1,5 @@
 import random
+
 import discord
 import youtube_dl
 from discord.ext import commands
@@ -37,7 +38,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_url(cls, url: str) -> list:
-        '''Returns a list of YTDLSource objects from a URL'''
+        """Returns a list of YTDLSource objects from a URL"""
 
         initial_data = ytdl.extract_info(url, download=False)
         if isinstance(initial_data, dict):
@@ -58,7 +59,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return []
 
 
-class Music():
+class Music:
     url: str = ''
     title: str = ''
 
@@ -72,17 +73,17 @@ class Audio(commands.Cog):
         self.bot = bot
         self.current_player: dict[str, Music] = {}  # {url: str, title: str}
         self.players: dict[str, list[Music]] = {}
-        self.loopings: dict[str, bool] = {}
+        self.looping: dict[str, bool] = {}
         self.skip: dict[str, bool] = {}
 
     @commands.Cog.listener()
     async def on_ready(self):
-        '''Inicia o bot de audio'''
+        """Inicia o bot de audio"""
         print('[Audio] Iniciando...')
         for guild in self.bot.guilds:
             self.current_player[str(guild.id)] = Music()
             self.players[str(guild.id)] = []
-            self.loopings[str(guild.id)] = False
+            self.looping[str(guild.id)] = False
             self.skip[str(guild.id)] = False
             print(f'[Audio] Iniciado em {guild.name}[{guild.id}]')
         print('[Audio] Pronto!')
@@ -92,31 +93,31 @@ class Audio(commands.Cog):
                 ctx.voice_client, discord.VoiceClient):
             print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
                   ) if e else None
-            if self.loopings[str(ctx.guild.id)] and not self.skip[str(ctx.guild.id)]:
+            if self.looping[str(ctx.guild.id)] and not self.skip[str(ctx.guild.id)]:
                 print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
                 player = await YTDLSource.from_url(self.current_player[str(
                     ctx.guild.id)].url)
                 ctx.voice_client.play(
                     player[0],
-                    after=lambda e: self.bot.loop.create_task(
-                        (self.play_next(ctx, e))))
+                    after=lambda er: self.bot.loop.create_task(
+                        (self.play_next(ctx, er))))
             elif len(self.players[str(ctx.guild.id)]) > 0:
                 if not ctx.voice_client.is_playing():
                     player = self.players[str(ctx.guild.id)].pop(0)
                     ctx.voice_client.play(
                         (await YTDLSource.from_url(player.url))[0],
-                        after=lambda e: self.bot.loop.create_task(
-                            (self.play_next(ctx, e))))
+                        after=lambda er: self.bot.loop.create_task(
+                            (self.play_next(ctx, er))))
                     self.current_player[str(ctx.guild.id)] = player
-                    self.skips[str(ctx.guild.id)] = False
+                    self.skip[str(ctx.guild.id)] = False
             else:
                 self.current_player[str(ctx.guild.id)].url = ''
                 self.current_player[str(ctx.guild.id)].title = ''
-                self.skips[str(ctx.guild.id)] = False
+                self.skip[str(ctx.guild.id)] = False
 
     @commands.command()
     async def play(self, ctx: Context, url: str):
-        '''Toca uma música de uma URL'''
+        """Toca uma música de uma URL"""
         musics: list[YTDLSource] = await YTDLSource.from_url(url)
         music: YTDLSource = musics[0]
 
@@ -157,7 +158,7 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def stop(self, ctx: Context):
-        '''Para de tocar'''
+        """Para de tocar"""
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             ctx.voice_client.stop()
@@ -168,7 +169,7 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def queue(self, ctx: Context):
-        '''Mostra a fila de músicas'''
+        """Mostra a fila de músicas"""
         if isinstance(ctx.guild, discord.Guild):
             if self.current_player[str(ctx.guild.id)] != '':
                 text = f'**Musica atual: {self.current_player[str(ctx.guild.id)].title}**\n\n'
@@ -181,7 +182,7 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def skip(self, ctx: Context):
-        '''Pula a música atual'''
+        """Pula a música atual"""
         self.skip[str(ctx.guild.id)] = True
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
@@ -193,17 +194,17 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def loop(self, ctx: Context):
-        '''Repete a música atual'''
+        """Repete a música atual"""
         if isinstance(ctx.guild, discord.Guild):
-            self.loopings[str(
-                ctx.guild.id)] = not self.loopings[str(ctx.guild.id)]
+            self.looping[str(
+                ctx.guild.id)] = not self.looping[str(ctx.guild.id)]
 
-            await ctx.send('Música sendo repetida!' if self.loopings[str(
+            await ctx.send('Música sendo repetida!' if self.looping[str(
                 ctx.guild.id)] else 'Música não está mais sendo repetida!')
 
     @commands.command()
     async def pause(self, ctx: Context):
-        '''Pausa a música atual'''
+        """Pausa a música atual"""
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             if ctx.voice_client.is_playing():
@@ -214,7 +215,7 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def resume(self, ctx: Context):
-        '''Resume a música atual'''
+        """Resume a música atual"""
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             if ctx.voice_client.is_paused():
@@ -224,15 +225,15 @@ class Audio(commands.Cog):
                 await ctx.send('Não há nada pausado!')
 
     @commands.command()
-    async def suffle(self, ctx: Context):
-        '''Embaralha a fila de músicas'''
+    async def shuffle(self, ctx: Context):
+        """Embaralha a fila de músicas"""
         if isinstance(ctx.guild, discord.Guild):
             random.shuffle(self.players[str(ctx.guild.id)])
             await ctx.send('Fila embaralhada!')
 
     @commands.command()
     async def remove(self, ctx: Context, index: int):
-        '''Remove uma música da fila'''
+        """Remove uma música da fila"""
         if isinstance(ctx.guild, discord.Guild):
             if index > len(self.players[str(ctx.guild.id)]) - 1:
                 await ctx.send('Index inválido!')
@@ -242,7 +243,7 @@ class Audio(commands.Cog):
 
     @commands.command()
     async def clear(self, ctx: Context):
-        '''Limpa a fila de músicas'''
+        """Limpa a fila de músicas"""
         if isinstance(ctx.guild, discord.Guild):
             self.players[str(ctx.guild.id)] = []
             await ctx.send('Fila limpa!')
