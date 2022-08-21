@@ -172,7 +172,9 @@ class Audio(commands.Cog):
         """Mostra a fila de músicas"""
         if isinstance(ctx.guild, discord.Guild):
             if self.current_player[str(ctx.guild.id)] != '':
-                text = f'**Musica atual: {self.current_player[str(ctx.guild.id)].title}**\n\n'
+                text = f'**SmileyBot [HARPI] :turtle:**\n\n'
+                text += f'Loop: {"Músicas em looping" if self.looping[str(ctx.guild.id)] else "Não está em looping"}'
+                text += f'**Musica atual: {self.current_player[str(ctx.guild.id)].title}**\n\n'
                 text += 'Fila:\n'
                 for i, music in enumerate(self.players[str(ctx.guild.id)]):
                     text += f' {i}. __{music}__\n'
