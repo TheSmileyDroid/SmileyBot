@@ -42,14 +42,14 @@ class Basic(commands.Cog):
         import threading
         from time import sleep
 
-        requests.get('https://smiley-droid-bot.herokuapp.com/', timeout=1000)
+        requests.get('https://smileybot.onrender.com', timeout=1000)
         # await ctx.send('Estou acordado!')
 
         def keep_alive():
             for i in range(half):
                 # Sleep for 25 minutes
                 sleep(60 * 20)
-                requests.get('https://smiley-droid-bot.herokuapp.com/',
+                requests.get('https://smileybot.onrender.com',
                              timeout=1000)
 
         try:
