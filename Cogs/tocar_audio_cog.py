@@ -93,8 +93,7 @@ class Audio(commands.Cog):
                 ctx.voice_client, discord.VoiceClient):
             print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
                   ) if e else None
-            if self.looping[str(ctx.guild.id)]
-            and not self.skip[str(ctx.guild.id)]:
+            if self.looping[str(ctx.guild.id)] and not self.skip[str(ctx.guild.id)]:
                 print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
                 player = await YTDLSource.from_url(self.current_player[str(
                     ctx.guild.id)].url)
@@ -126,8 +125,7 @@ class Audio(commands.Cog):
                 ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == '':
                 print(
-                    f'[INFO] Tocando {
-                        format(music.title)}({ctx.guild}[{ctx.guild.id}])'
+                    f'[INFO] Tocando {format(music.title)}({ctx.guild}[{ctx.guild.id}])'
                 )
                 if not ctx.voice_client.is_playing():
                     ctx.voice_client.play(
@@ -140,9 +138,7 @@ class Audio(commands.Cog):
                     await ctx.send(f'Tocando **{music.title}**!!!!')
             else:
                 print(
-                    f'[INFO] ** {
-                        format(musics[0].title)} ** adicionado a fila({
-                            ctx.guild}[{ctx.guild.id}])'
+                    f'[INFO] ** {format(musics[0].title)} ** adicionado a fila({ctx.guild}[{ctx.guild.id}])'
                 )
                 music_data = Music()
                 music_data.title = music.title
@@ -156,8 +152,7 @@ class Audio(commands.Cog):
                 music_data.title = musics[i].title
                 self.players[str(ctx.guild.id)].append(music_data)
                 print(
-                    f'[INFO] ** {music_data.title} ** adicionado a fila({
-                        ctx.guild}[{ctx.guild.id}])'
+                    f'[INFO] ** {music_data.title} ** adicionado a fila({ctx.guild}[{ctx.guild.id}])'
                 )
                 await ctx.send(f'**{music_data.title}** adicionada a fila')
 
@@ -178,11 +173,8 @@ class Audio(commands.Cog):
         if isinstance(ctx.guild, discord.Guild):
             if self.current_player[str(ctx.guild.id)] != '':
                 text = f'**SmileyBot [HARPI] :turtle:**\n\n'
-                text += f'Loop: {
-                    "Músicas em looping" if self.looping[str(ctx.guild.id)]
-                    else "Não está em looping"}\n\n'
-                text += f'** Musica atual: {
-                    self.current_player[str(ctx.guild.id)].title} **\n\n'
+                text += f'Loop: {"Músicas em looping" if self.looping[str(ctx.guild.id)] else "Não está em looping"}\n\n'
+                text += f'** Musica atual: {self.current_player[str(ctx.guild.id)].title} **\n\n'
                 if len(self.players[str(ctx.guild.id)]) > 0:
                     text += 'Fila:\n'
                     for i, music in enumerate(self.players[str(ctx.guild.id)]):
