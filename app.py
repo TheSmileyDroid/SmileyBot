@@ -9,10 +9,13 @@ app = flask.Flask(__name__)
 def home():
     return 'Oi, eu to vivo'
 
+def run():
+    app.run(host='0.0.0.0')
 
 try:
     t = Thread(target=bot.run)
     t.start()
+    run()
 except Exception as e:
     print(e)
 

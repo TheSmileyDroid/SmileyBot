@@ -12,6 +12,9 @@ if __name__ == '__main__':
     bot.add_cog(reddit_cog.Reddit)
     bot.add_cog(rpg_cog.RPG)
 
+    # Keep 
+    
+
     # Connect
     bot.run(os.environ['DISCORD_ID'])
 
