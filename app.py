@@ -1,7 +1,6 @@
 import flask
 import os
 from threading import Thread
-import smiley_bot as bot
 
 app = flask.Flask(__name__)
 
@@ -10,12 +9,8 @@ def home():
     return 'Oi, eu to vivo'
 
 def run():
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
-try:
-    t = Thread(target=bot.run)
-    t.start()
-    run()
-except Exception as e:
-    print(e)
-
+def keep_alive():
+    server = Thread(target=run)
+    server.start()
