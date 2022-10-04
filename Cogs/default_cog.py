@@ -15,6 +15,12 @@ class Basic(commands.Cog):
         '''Conecta o bot a um canal de voz'''
         if isinstance(ctx.author, Member):
             autor: Member = ctx.author
+            if not isinstance(autor.voice, VoiceChannel):
+                await ctx.send('Você precisa estar em um canal de voz')
+                return
+            if not isinstance(autor.voice.channel, VoiceChannel):
+                await ctx.send('Você precisa estar em um canal de voz')
+                return
             await autor.voice.channel.connect()
 
     @commands.Cog.listener()

@@ -4,7 +4,7 @@ import discord
 import youtube_dl
 from discord.ext import commands
 from discord.ext.commands.context import Context
-
+import requests
 youtube_dl.utils.bug_reports_message = lambda: ''
 
 ytdl_format_options = {
@@ -74,7 +74,7 @@ class Audio(commands.Cog):
         self.current_player: dict[str, Music] = {}  # {url: str, title: str}
         self.players: dict[str, list[Music]] = {}
         self.looping: dict[str, bool] = {}
-        self.skip: dict[str, bool] = {}
+        self.skips: dict[str, bool] = {}
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -84,16 +84,17 @@ class Audio(commands.Cog):
             self.current_player[str(guild.id)] = Music()
             self.players[str(guild.id)] = []
             self.looping[str(guild.id)] = False
-            self.skip[str(guild.id)] = False
+            self.skips[str(guild.id)] = False
             print(f'[Audio] Iniciado em {guild.name}[{guild.id}]')
         print('[Audio] Pronto!')
 
     async def play_next(self, ctx: Context, e=None):
+        requests.get('https://smileybot.onrender.com', timeout=1000)
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
                   ) if e else None
-            if self.looping[str(ctx.guild.id)] and not self.skip[str(ctx.guild.id)]:
+            if self.looping[str(ctx.guild.id)] and not self.skips[str(ctx.guild.id)]:
                 print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
                 player = await YTDLSource.from_url(self.current_player[str(
                     ctx.guild.id)].url)
@@ -109,11 +110,11 @@ class Audio(commands.Cog):
                         after=lambda er: self.bot.loop.create_task(
                             (self.play_next(ctx, er))))
                     self.current_player[str(ctx.guild.id)] = player
-                    self.skip[str(ctx.guild.id)] = False
+                    self.skips[str(ctx.guild.id)] = False
             else:
                 self.current_player[str(ctx.guild.id)].url = ''
                 self.current_player[str(ctx.guild.id)].title = ''
-                self.skip[str(ctx.guild.id)] = False
+                self.skips[str(ctx.guild.id)] = False
 
     @commands.command()
     async def play(self, ctx: Context, url: str):
@@ -186,7 +187,9 @@ class Audio(commands.Cog):
     @commands.command()
     async def skip(self, ctx: Context):
         """Pula a música atual"""
-        self.skip[str(ctx.guild.id)] = True
+        if not isinstance(ctx.guild, discord.Guild):
+            return
+        self.skips[str(ctx.guild.id)] = True
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == '':
