@@ -11,3 +11,4 @@ Werkzeug
 yarl
 youtube-dl
 SQLAlchemy
+Gunicorn
