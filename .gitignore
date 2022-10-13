@@ -5,3 +5,6 @@ staticfiles
 .env
 db.sqlite3
 youtube-*
+run.bat
+run.sh
+NUL

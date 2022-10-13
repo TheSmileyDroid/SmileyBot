@@ -8,6 +8,11 @@ app = flask.Flask(__name__)
 def home():
     return 'Oi, eu to vivo'
 
+@app.route('/kill')
+def kill():
+    os.popen('kill 1')
+    return 'Server shutting down...'
+
 def run():
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
 
