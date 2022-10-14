@@ -12,9 +12,12 @@ class BotBuilder():
                                               case_insensitive=True, intents=intents)
 
     def add_cog(self, cog: Type[commands.Cog]):
-      loop = asyncio.get_event_loop()
-      coroutine = self.bot.add_cog(cog(self.bot))
-      loop.run_until_complete(coroutine)
+      try: 
+        self.bot.add_cog(cog(self.bot))
+      except:
+        loop = asyncio.get_event_loop()
+        coroutine = self.bot.add_cog(cog(self.bot))
+        loop.run_until_complete(coroutine)
 
     def remove_cog(self, cog_name: str):
       self.bot.remove_cog(cog_name)
