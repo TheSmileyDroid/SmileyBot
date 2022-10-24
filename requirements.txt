@@ -1,6 +1,7 @@
 asyncpraw
 asyncprawcore
 discord.py
+discord.py[voice]
 ffmpeg
 Flask
 gTTS
