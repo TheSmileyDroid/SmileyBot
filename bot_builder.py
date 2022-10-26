@@ -13,11 +13,11 @@ class BotBuilder():
 
     def add_cog(self, cog: Type[commands.Cog]):
       try: 
-        self.bot.add_cog(cog(self.bot))
-      except:
         loop = asyncio.get_event_loop()
         coroutine = self.bot.add_cog(cog(self.bot))
         loop.run_until_complete(coroutine)
+      except:
+        self.bot.add_cog(cog(self.bot))
 
     def remove_cog(self, cog_name: str):
       self.bot.remove_cog(cog_name)
