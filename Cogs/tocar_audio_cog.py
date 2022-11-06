@@ -1,10 +1,9 @@
 import random
-
 import discord
 import youtube_dl
 from discord.ext import commands
 from discord.ext.commands.context import Context
-import requests
+
 youtube_dl.utils.bug_reports_message = lambda: ''
 
 ytdl_format_options = {
@@ -76,6 +75,12 @@ class Audio(commands.Cog):
         self.looping: dict[str, bool] = {}
         self.skips: dict[str, bool] = {}
 
+    def check_voice(self, ctx: Context) -> bool:
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
+            return True
+        return False
+
     @commands.Cog.listener()
     async def on_ready(self):
         """Inicia o bot de audio"""
@@ -89,32 +94,30 @@ class Audio(commands.Cog):
         print('[Audio] Pronto!')
 
     async def play_next(self, ctx: Context, e=None):
-        requests.get('https://smileybot.onrender.com', timeout=1000)
-        if isinstance(ctx.guild, discord.Guild) and isinstance(
-                ctx.voice_client, discord.VoiceClient):
-            print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
-                  ) if e else None
-            if self.looping[str(ctx.guild.id)] and not self.skips[str(ctx.guild.id)]:
-                print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
-                player = await YTDLSource.from_url(self.current_player[str(
-                    ctx.guild.id)].url)
+        print(f'[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])'
+                ) if e else None
+        if self.looping[str(ctx.guild.id)] and not self.skips[str(ctx.guild.id)]:
+            print(f'[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]')
+            player = await YTDLSource.from_url(self.current_player[str(
+                ctx.guild.id)].url)
+            ctx.voice_client.play(
+                player[0],
+                after=lambda er: self.bot.loop.create_task(
+                    (self.play_next(ctx, er))))
+        elif len(self.players[str(ctx.guild.id)]) > 0:
+            if not ctx.voice_client.is_playing():
+                player = self.players[str(ctx.guild.id)].pop(0)
                 ctx.voice_client.play(
-                    player[0],
+                    (await YTDLSource.from_url(player.url))[0],
                     after=lambda er: self.bot.loop.create_task(
                         (self.play_next(ctx, er))))
-            elif len(self.players[str(ctx.guild.id)]) > 0:
-                if not ctx.voice_client.is_playing():
-                    player = self.players[str(ctx.guild.id)].pop(0)
-                    ctx.voice_client.play(
-                        (await YTDLSource.from_url(player.url))[0],
-                        after=lambda er: self.bot.loop.create_task(
-                            (self.play_next(ctx, er))))
-                    self.current_player[str(ctx.guild.id)] = player
-                    self.skips[str(ctx.guild.id)] = False
-            else:
-                self.current_player[str(ctx.guild.id)].url = ''
-                self.current_player[str(ctx.guild.id)].title = ''
+                self.current_player[str(ctx.guild.id)] = player
                 self.skips[str(ctx.guild.id)] = False
+        else:
+            self.current_player[str(ctx.guild.id)].url = ''
+            self.current_player[str(ctx.guild.id)].title = ''
+            self.skips[str(ctx.guild.id)] = False
+            
 
     @commands.command()
     async def play(self, ctx: Context, url: str):
@@ -122,40 +125,36 @@ class Audio(commands.Cog):
         musics: list[YTDLSource] = await YTDLSource.from_url(url)
         music: YTDLSource = musics[0]
 
-        if isinstance(ctx.guild, discord.Guild) and isinstance(
-                ctx.voice_client, discord.VoiceClient):
-            if self.current_player[str(ctx.guild.id)].url == '':
-                print(
-                    f'[INFO] Tocando {format(music.title)}({ctx.guild}[{ctx.guild.id}])'
-                )
-                if not ctx.voice_client.is_playing():
-                    ctx.voice_client.play(
-                        music,
-                        after=lambda e: self.bot.loop.create_task(
-                            (self.play_next(ctx, e))))
-                    self.current_player[str(ctx.guild.id)].url = music.url
-                    self.current_player[str(ctx.guild.id)].title = format(
-                        music.title)
-                    await ctx.send(f'Tocando **{music.title}**!!!!')
-            else:
-                print(
-                    f'[INFO] ** {format(musics[0].title)} ** adicionado a fila({ctx.guild}[{ctx.guild.id}])'
-                )
-                music_data = Music()
-                music_data.title = music.title
-                music_data.url = music.url
-                self.players[str(ctx.guild.id)].append(music_data)
-                await ctx.send(f'**{musics[0].title}** adicionado a fila')
+        if self.current_player[str(ctx.guild.id)].url == '':
+            print(f'[INFO] Tocando {format(music.title)}({ctx.guild}[{ctx.guild.id}])')
+            if not ctx.voice_client.is_playing():
+                ctx.voice_client.play(
+                    music,
+                    after=lambda e: self.bot.loop.create_task(
+                        (self.play_next(ctx, e))))
+                self.current_player[str(ctx.guild.id)].url = music.url
+                self.current_player[str(ctx.guild.id)].title = format(
+                    music.title)
+                await ctx.send(f'Tocando **{music.title}**!!!!')
+        else:
+            print(
+                f'[INFO] ** {format(musics[0].title)} ** adicionado a fila({ctx.guild}[{ctx.guild.id}])'
+            )
+            music_data = Music()
+            music_data.title = music.title
+            music_data.url = music.url
+            self.players[str(ctx.guild.id)].append(music_data)
+            await ctx.send(f'**{musics[0].title}** adicionado a fila')
 
-            for i in range(1, len(musics)):
-                music_data: Music = Music()
-                music_data.url = musics[i].url
-                music_data.title = musics[i].title
-                self.players[str(ctx.guild.id)].append(music_data)
-                print(
-                    f'[INFO] ** {music_data.title} ** adicionado a fila({ctx.guild}[{ctx.guild.id}])'
-                )
-                await ctx.send(f'**{music_data.title}** adicionada a fila')
+        for i in range(1, len(musics)):
+            music_data: Music = Music()
+            music_data.url = musics[i].url
+            music_data.title = musics[i].title
+            self.players[str(ctx.guild.id)].append(music_data)
+            print(
+                f'[INFO] ** {music_data.title} ** adicionado a fila({ctx.guild}[{ctx.guild.id}])'
+            )
+            await ctx.send(f'**{music_data.title}** adicionada a fila')
 
     @commands.command()
     async def stop(self, ctx: Context):
@@ -253,9 +252,27 @@ class Audio(commands.Cog):
         if isinstance(ctx.guild, discord.Guild):
             self.players[str(ctx.guild.id)] = []
             await ctx.send('Fila limpa!')
+    
+    @commands.command()
+    async def leave(self, ctx: Context):
+        """Desconecta o bot do canal de voz"""
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
+            await ctx.voice_client.disconnect()
+            self.players[str(ctx.guild.id)] = []
+            self.current_player[str(ctx.guild.id)].url = ''
+            self.current_player[str(ctx.guild.id)].title = ''
+            await ctx.send('Desconectado!')
 
     @play.before_invoke
     @stop.before_invoke
+    @skip.before_invoke
+    @clear.before_invoke
+    @remove.before_invoke
+    @shuffle.before_invoke
+    @pause.before_invoke
+    @resume.before_invoke
+    @leave.before_invoke
     async def voice(self, ctx):
         '''Conecta o bot ao canal de voz'''
         if ctx.voice_client is None:
@@ -273,14 +290,5 @@ class Audio(commands.Cog):
                          o bot está em outro canal de voz")
                     raise commands.CommandError(
                         "Author not connected to a voice channel.")
-
-    @commands.command()
-    async def leave(self, ctx: Context):
-        """Desconecta o bot do canal de voz"""
-        if isinstance(ctx.guild, discord.Guild) and isinstance(
-                ctx.voice_client, discord.VoiceClient):
-            await ctx.voice_client.disconnect()
-            self.players[str(ctx.guild.id)] = []
-            self.current_player[str(ctx.guild.id)].url = ''
-            self.current_player[str(ctx.guild.id)].title = ''
-            await ctx.send('Desconectado!')
+        if not self.check_voice(ctx):
+            raise commands.CommandError("Bot not connected to a voice channel.")

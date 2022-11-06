@@ -1,11 +1,6 @@
 # RPG Cog
-
-from unittest import result
-import discord
 from discord.ext import commands
-
 import random
-import os
 
 
 class RPG(commands.Cog):
@@ -14,23 +9,25 @@ class RPG(commands.Cog):
         self.bot = bot
 
     @commands.command(name='roll', aliases=['r', 'dado', 'd'])
-    async def roll(self, ctx, *, args):
+    async def roll(self, ctx, *, args: str):
         """Rolls a dice in NdN format."""
         try:
-            rolls, limit = args.split('d')
-        except:
-            await ctx.send('O formato deve ser NdN!')
+            rolls, limit_modifier = args.split('d')
+            limit, modifier = limit_modifier.split(['+ -'])
+        except Exception as e:
+            await ctx.send(f'O formato deve ser NdN! Error: {e}')
             return
         try:
             rolls = int(rolls)
             limit = int(limit)
-        except:
-            await ctx.send('O formato deve ser NdN!')
+            modifier = int(modifier)
+        except Exception as e:
+            await ctx.send(f'O formato deve ser NdN! Error: {e}')
             return
 
         numbers = [str(random.randint(1, limit)) for r in range(rolls)]
         result = ((', '.join(numbers) + ' = ') if len(numbers) > 1 else
-                  '') + str(sum(int(n) for n in numbers))
+                  '') + str(sum(int(n) for n in numbers)+modifier)
         await ctx.send(result)
 
     @commands.command()
