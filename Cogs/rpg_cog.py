@@ -1,7 +1,9 @@
 # RPG Cog
 from discord.ext import commands
 import random
+import re
 
+random.seed()
 
 class RPG(commands.Cog):
 
@@ -10,24 +12,25 @@ class RPG(commands.Cog):
 
     @commands.command(name='roll', aliases=['r', 'dado', 'd'])
     async def roll(self, ctx, *, args: str):
-        """Rolls a dice in NdN format."""
-        try:
-            rolls, limit_modifier = args.split('d')
-            limit, modifier = limit_modifier.split(['+ -'])
-        except Exception as e:
-            await ctx.send(f'O formato deve ser NdN! Error: {e}')
+        """Rolls a dice in NdN+N format."""
+        args = args.replace(' ', '')
+        dice = re.findall(r'(\d+)d(\d+)([+-]\d+)?', args)
+        dice = [int(dice[0][0]), int(dice[0][1]), int(dice[0][2]) if dice[0][2] else 0]
+        if len(dice) == 0:
+            await ctx.send('Formato inválido. Exemplo: 3d6+1')
             return
         try:
-            rolls = int(rolls)
-            limit = int(limit)
-            modifier = int(modifier)
+            rolls = int(dice[0])
+            limit = int(dice[1])
+            modifier = int(dice[2]) if dice[2] else 0
         except Exception as e:
-            await ctx.send(f'O formato deve ser NdN! Error: {e}')
+            await ctx.send(f'O formato deve ser NdN+N! Error when converting: {e}\
+                \ndice: {dice}')
             return
 
         numbers = [str(random.randint(1, limit)) for r in range(rolls)]
-        result = ((', '.join(numbers) + ' = ') if len(numbers) > 1 else
-                  '') + str(sum(int(n) for n in numbers)+modifier)
+        result = ((', '.join(numbers) if modifier else None) + ' = ' + str(sum(int(n) for n in numbers) + modifier)) if len(numbers) > 1 else '' + str(sum(int(n) for n in numbers) + modifier)
+        result += f' ({str(sum(int(n) for n in numbers))} _**{modifier:+}**_)' if modifier else ''
         await ctx.send(result)
 
     @commands.command()

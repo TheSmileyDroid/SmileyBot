@@ -17,7 +17,7 @@ if __name__ == '__main__':
     bot.add_cog(rpg_cog.RPG)
 
     # Keep 
-    keep_alive()
+    # keep_alive()
 
     # Connect
     bot.run(os.environ['DISCORD_ID'])
