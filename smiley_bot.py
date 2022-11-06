@@ -1,7 +1,7 @@
 import os
 
 from bot_builder import BotBuilder
-from Cogs import (default_cog, tocar_audio_cog, reddit_cog, falar_cog, rpg_cog)
+from Cogs import (default_cog, tocar_audio_cog, reddit_cog, falar_cog, rpg_cog, math_cog)
 from app import keep_alive
 import discord
 
@@ -15,6 +15,7 @@ if __name__ == '__main__':
     bot.add_cog(falar_cog.Falar)
     bot.add_cog(tocar_audio_cog.Audio)
     bot.add_cog(rpg_cog.RPG)
+    bot.add_cog(math_cog.Math)
 
     # Keep 
     # keep_alive()

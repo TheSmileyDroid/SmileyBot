@@ -16,7 +16,8 @@ class BotBuilder():
         loop = asyncio.get_event_loop()
         coroutine = self.bot.add_cog(cog(self.bot))
         loop.run_until_complete(coroutine)
-      except:
+      except Exception as e:
+        print(f'Error when adding cog: {e}')
         self.bot.add_cog(cog(self.bot))
 
     def remove_cog(self, cog_name: str):
