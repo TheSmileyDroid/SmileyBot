@@ -94,11 +94,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return cls(discord.FFmpegPCMAudio(data['url'], **ffmpeg_options), data=data)
 
 
-
-
-
-
-
 class Audio(commands.Cog):
 
     def __init__(self, bot: discord.Client):
@@ -155,11 +150,12 @@ class Audio(commands.Cog):
     @commands.command()
     async def play(self, ctx: Context, url: str):
         """Toca uma música de uma URL"""
+        await self.voice(ctx)
         musics: list[Music] = Music.from_url(url)
         music: YTDLSource = await YTDLSource.from_music(music=musics[0])
 
         if self.current_player[str(ctx.guild.id)].url == '':
-            print(f'[INFO] Tocando {format(music.title)}({ctx.guild}[{ctx.guild.id}])')
+            print(f'[INFO] Tocando {format(music.title)}({ctx.guild}[{ctx.guild.id}] in {ctx.author}[{ctx.author.id}])')
             if not ctx.voice_client.is_playing():
                 ctx.voice_client.play(
                     music,
@@ -186,6 +182,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def stop(self, ctx: Context):
         """Para de tocar"""
+        await self.voice(ctx)
         ctx.voice_client.stop()
         self.players[str(ctx.guild.id)] = []
         self.current_player[str(ctx.guild.id)].url = ''
@@ -211,6 +208,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def skip(self, ctx: Context):
         """Pula a música atual"""
+        await self.voice(ctx)
         self.skips[str(ctx.guild.id)] = True
         if isinstance(ctx.guild, discord.Guild) and isinstance(
                 ctx.voice_client, discord.VoiceClient):
@@ -223,6 +221,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def loop(self, ctx: Context):
         """Repete a música atual"""
+        await self.voice(ctx)
         self.looping[str(
             ctx.guild.id)] = not self.looping[str(ctx.guild.id)]
 
@@ -232,6 +231,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def pause(self, ctx: Context):
         """Pausa a música atual"""
+        await self.voice(ctx)
         if ctx.voice_client.is_playing():
             ctx.voice_client.pause()
             await ctx.send('Música pausada!')
@@ -241,6 +241,7 @@ class Audio(commands.Cog):
     @commands.command()
     async def resume(self, ctx: Context):
         """Resume a música atual"""
+        await self.voice(ctx)
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
             await ctx.send('Música resumida!')
@@ -250,12 +251,14 @@ class Audio(commands.Cog):
     @commands.command()
     async def shuffle(self, ctx: Context):
         """Embaralha a fila de músicas"""
+        await self.voice(ctx)
         random.shuffle(self.players[str(ctx.guild.id)])
         await ctx.send('Fila embaralhada!')
 
     @commands.command()
     async def remove(self, ctx: Context, index: int):
         """Remove uma música da fila"""
+        await self.voice(ctx)
         if index > len(self.players[str(ctx.guild.id)]) - 1:
             await ctx.send('Index inválido!')
             return
@@ -265,27 +268,20 @@ class Audio(commands.Cog):
     @commands.command()
     async def clear(self, ctx: Context):
         """Limpa a fila de músicas"""
+        await self.voice(ctx)
         self.players[str(ctx.guild.id)] = []
         await ctx.send('Fila limpa!')
     
     @commands.command()
     async def leave(self, ctx: Context):
         """Desconecta o bot do canal de voz"""
+        await self.voice(ctx)
         await ctx.voice_client.disconnect()
         self.players[str(ctx.guild.id)] = []
         self.current_player[str(ctx.guild.id)].url = ''
         self.current_player[str(ctx.guild.id)].title = ''
         await ctx.send('Desconectado!')
 
-    @play.before_invoke
-    @stop.before_invoke
-    @skip.before_invoke
-    @clear.before_invoke
-    @remove.before_invoke
-    @shuffle.before_invoke
-    @pause.before_invoke
-    @resume.before_invoke
-    @leave.before_invoke
     async def voice(self, ctx):
         '''Conecta o bot ao canal de voz'''
         if ctx.voice_client is None:
