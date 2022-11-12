@@ -147,3 +147,6 @@ class Math(commands.Cog):
             await ctx.send(str(safe_eval(args)))
         except Exception as e:
             await ctx.send(f"Erro ao calcular: {e}")
+
+def setup(client):
+	client.add_cog(Math(client))

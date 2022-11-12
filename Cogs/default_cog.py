@@ -38,3 +38,6 @@ class Basic(commands.Cog):
     @commands.command()
     async def list_voice_channels(self, ctx: Context):
         await ctx.send()
+
+def setup(client):
+	client.add_cog(Basic(client))

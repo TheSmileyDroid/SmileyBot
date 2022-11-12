@@ -61,3 +61,6 @@ class RPG(commands.Cog):
     async def ficha(self, ctx: commands.Context):
         """Shows your character sheet."""
         await ctx.send("")
+
+def setup(client):
+	client.add_cog(RPG(client))

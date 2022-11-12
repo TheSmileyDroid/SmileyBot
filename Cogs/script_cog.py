@@ -3,7 +3,7 @@ import asyncio
 import discord
 from discord.ext import commands
 from discord.ext.commands.context import Context
-
+from typing import TypeVar
 
 class Script(commands.Cog):
     def __init__(self, bot: commands.Bot) -> None:
@@ -15,7 +15,7 @@ class Script(commands.Cog):
         self.bot_msg = {}  # {user_id: msg}
 
     @commands.Cog.listener()
-    async def on_ready(self: Script):
+    async def on_ready(self: TypeVar("Script")):
         print("[Script] Iniciando...")
         for guild in self.bot.guilds:
             for member in guild.members:
@@ -135,7 +135,7 @@ end\n\
             return
 
     @commands.command(name="run", help="Executa um script")
-    async def run(self: Cog, ctx: Context, script_name: str):
+    async def run(self: commands.Cog, ctx: Context, script_name: str):
 
         if script_name == "list":
             await ctx.send(
@@ -167,3 +167,6 @@ end\n\
                 return
         else:
             await ctx.send(f"**Scripts:** Script {script_name} não encontrado.")
+
+def setup(client):
+	client.add_cog(Script(client))

@@ -54,3 +54,6 @@ class Falar(commands.Cog):
                          o bot está em outro canal de voz")
                     raise commands.CommandError(
                         "Author not connected to a voice channel.")
+
+def setup(client):
+	client.add_cog(Falar(client))

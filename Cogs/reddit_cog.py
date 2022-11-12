@@ -53,3 +53,6 @@ class Reddit(commands.Cog):
         post = random.choice(cats)
         await ctx.send(embed=discord.Embed(
             description=post.subreddit).set_image(url=post.url))
+
+def setup(client):
+	client.add_cog(Reddit(client))

@@ -1,4 +1,5 @@
 import random
+from typing import TypeVar
 
 import discord
 import youtube_dl
@@ -31,7 +32,7 @@ class Music:
     title: str = ""
 
     @classmethod
-    def from_url(cls, url: str) -> [Music]:
+    def from_url(cls, url: str) -> [TypeVar("Music")]:
         """
         This function is used to get the music from the url.
         :param cls:
@@ -100,7 +101,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         return []
 
     @classmethod
-    async def from_music(cls: YTDLSource, music: Music) -> list:
+    async def from_music(cls: TypeVar("YTDLSource"), music: Music) -> list:
         """Returns a list of YTDLSource objects from a Music object"""
 
         data = ytdl.extract_info(music.url, download=False)
@@ -327,3 +328,6 @@ class Audio(commands.Cog):
                     )
         if not self.check_voice(ctx):
             raise commands.CommandError("Bot not connected to a voice channel.")
+
+def setup(client):
+	client.add_cog(Audio(client))
