@@ -1,23 +1,24 @@
-import flask
 import os
 from threading import Thread
+
+import flask
 
 app = flask.Flask(__name__)
 
 
-@app.route('/')
+@app.route("/")
 def home():
-    return 'Oi, eu to vivo'
+    return "Oi, eu to vivo"
 
 
-@app.route('/kill')
+@app.route("/kill")
 def kill():
-    os.popen('kill 1')
-    return 'Server shutting down...'
+    os.popen("kill 1")
+    return "Server shutting down..."
 
 
 def run():
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 5000)))
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
 
 def keep_alive():

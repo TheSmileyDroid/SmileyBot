@@ -5,5 +5,7 @@
     "python.linting.pycodestyleEnabled": false,
     "python.linting.pylamaEnabled": false,
     "python.linting.banditEnabled": true,
-    "python.linting.prospectorEnabled": false
+    "python.linting.prospectorEnabled": false,
+    "editor.tabCompletion": "on",
+    "diffEditor.codeLens": true
 }

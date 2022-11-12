@@ -5,27 +5,27 @@ from discord.ext.commands.context import Context
 
 
 class Basic(commands.Cog):
-    '''Usado para testes'''
+    """Usado para testes"""
 
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command()
-    async def connect_to_voice(self, ctx: Context):
-        '''Conecta o bot a um canal de voz'''
+    async def connect_to_voice(self, ctx: Context) -> None:
+        """Conecta o bot a um canal de voz"""
         if isinstance(ctx.author, Member):
             autor: Member = ctx.author
             if not isinstance(autor.voice, VoiceChannel):
-                await ctx.send('Você precisa estar em um canal de voz')
+                await ctx.send("Você precisa estar em um canal de voz")
                 return
             if not isinstance(autor.voice.channel, VoiceChannel):
-                await ctx.send('Você precisa estar em um canal de voz')
+                await ctx.send("Você precisa estar em um canal de voz")
                 return
             await autor.voice.channel.connect()
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f'Connected as {self.bot.user.display_name}')
+        print(f"Connected as {self.bot.user.display_name}")
 
     @commands.command()
     async def test(self, ctx: Context, args: str):
@@ -38,30 +38,3 @@ class Basic(commands.Cog):
     @commands.command()
     async def list_voice_channels(self, ctx: Context):
         await ctx.send()
-
-    @commands.command()
-    async def stay(self, ctx: Context, half: int = 0):
-        '''Esse comando serve para manter o bot acordado por um tempo (em meia horas)'''
-
-        # For each half hour in the half variable, a request will be sent to the link https://smiley-droid-bot.herokuapp.com/
-        import requests
-        import threading
-        from time import sleep
-
-        requests.get('https://smileybot.onrender.com', timeout=1000)
-        # await ctx.send('Estou acordado!')
-
-        def keep_alive():
-            for i in range(half):
-                # Sleep for 25 minutes
-                sleep(60 * 20)
-                requests.get('https://smileybot.onrender.com',
-                             timeout=1000)
-
-        try:
-            if half >= 24:
-                raise Exception('O tempo não pode ser maior que 8 horas')
-            thread = threading.Thread(target=keep_alive)
-            thread.start()
-        except Exception as e:
-            await ctx.send(f'Não foi possível iniciar o stay!\n{e}')
