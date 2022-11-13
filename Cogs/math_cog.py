@@ -89,6 +89,7 @@ def safe_eval(s: str) -> float:
 
 
 class Math(commands.Cog):
+
     def __init__(self, bot: discord.Client):
         self.bot = bot
 
@@ -100,7 +101,8 @@ class Math(commands.Cog):
     async def sub(self, ctx: Context, a: int, b: int):
         await ctx.send(str(a - b))
 
-    @commands.command(name="mult", aliases=["*", "multiplicar", "multiplicação"])
+    @commands.command(name="mult",
+                      aliases=["*", "multiplicar", "multiplicação"])
     async def mult(self, ctx: Context, a: int, b: int):
         await ctx.send(str(a * b))
 
@@ -113,8 +115,8 @@ class Math(commands.Cog):
         await ctx.send(str(a**b))
 
     @commands.command(
-        name="sqrt", aliases=["raiz", "raiz quadrada", "raizquadrada", "raizq"]
-    )
+        name="sqrt",
+        aliases=["raiz", "raiz quadrada", "raizquadrada", "raizq"])
     async def sqrt(self, ctx: Context, a: int):
         await ctx.send(str(a**0.5))
 
@@ -138,9 +140,8 @@ class Math(commands.Cog):
     async def abs(self, ctx: Context, a: int):
         await ctx.send(str(abs(a)))
 
-    @commands.command(
-        name="calcular", aliases=["calc", "calculadora", "calculate", "cal"]
-    )
+    @commands.command(name="calcular",
+                      aliases=["calc", "calculadora", "calculate", "cal"])
     async def calc(self, ctx: Context, *, args: str) -> None:
         """Calculates a function."""
         try:
@@ -148,5 +149,6 @@ class Math(commands.Cog):
         except Exception as e:
             await ctx.send(f"Erro ao calcular: {e}")
 
-def setup(client):
-	client.add_cog(Math(client))
+
+async def setup(client):
+    await client.add_cog(Math(client))

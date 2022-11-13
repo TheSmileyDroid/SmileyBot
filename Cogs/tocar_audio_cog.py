@@ -62,9 +62,12 @@ class Music:
 
 
 class YTDLSource(discord.PCMVolumeTransformer):
-    def __init__(
-        self, source: discord.FFmpegPCMAudio, *, data: dict, volume: float = 0.5
-    ):
+
+    def __init__(self,
+                 source: discord.FFmpegPCMAudio,
+                 *,
+                 data: dict,
+                 volume: float = 0.5):
         super().__init__(source, volume)
 
         self.data = data
@@ -86,8 +89,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                         cls(
                             discord.FFmpegPCMAudio(filename, **ffmpeg_options),
                             data=entry,
-                        )
-                    )
+                        ))
                 return sources
             else:
                 filename = initial_data["url"]
@@ -95,8 +97,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
                     cls(
                         discord.FFmpegPCMAudio(filename, **ffmpeg_options),
                         data=initial_data,
-                    )
-                )
+                    ))
                 return sources
         return []
 
@@ -106,10 +107,12 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         data = ytdl.extract_info(music.url, download=False)
         data["title"] = music.title
-        return cls(discord.FFmpegPCMAudio(data["url"], **ffmpeg_options), data=data)
+        return cls(discord.FFmpegPCMAudio(data["url"], **ffmpeg_options),
+                   data=data)
 
 
 class Audio(commands.Cog):
+
     def __init__(self, bot: discord.Client) -> None:
         self.bot = bot
         self.current_player: dict[str, Music] = {}  # {url: str, title: str}
@@ -126,8 +129,7 @@ class Audio(commands.Cog):
         :return: True if the bot is in a voice channel, False otherwise.
         """
         if isinstance(ctx.guild, discord.Guild) and isinstance(
-            ctx.voice_client, discord.VoiceClient
-        ):
+                ctx.voice_client, discord.VoiceClient):
             return True
         return False
 
@@ -144,15 +146,17 @@ class Audio(commands.Cog):
         print("[Audio] Pronto!")
 
     async def play_next(self, ctx: Context, e=None):
-        print(f"[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])") if e else None
-        if self.looping[str(ctx.guild.id)] and not self.skips[str(ctx.guild.id)]:
+        print(f"[ERROR] Player error: {e} ({ctx.guild}[{ctx.guild.id}])"
+              ) if e else None
+        if self.looping[str(
+                ctx.guild.id)] and not self.skips[str(ctx.guild.id)]:
             print(f"[Audio] Repetindo {ctx.guild.name}[{ctx.guild.id}]")
-            player = await YTDLSource.from_url(
-                self.current_player[str(ctx.guild.id)].url
-            )
+            player = await YTDLSource.from_url(self.current_player[str(
+                ctx.guild.id)].url)
             ctx.voice_client.play(
                 player[0],
-                after=lambda er: self.bot.loop.create_task((self.play_next(ctx, er))),
+                after=lambda er: self.bot.loop.create_task(
+                    (self.play_next(ctx, er))),
             )
         elif len(self.players[str(ctx.guild.id)]) > 0:
             if not ctx.voice_client.is_playing():
@@ -160,8 +164,7 @@ class Audio(commands.Cog):
                 ctx.voice_client.play(
                     (await YTDLSource.from_music(player)),
                     after=lambda er: self.bot.loop.create_task(
-                        (self.play_next(ctx, er))
-                    ),
+                        (self.play_next(ctx, er))),
                 )
                 self.current_player[str(ctx.guild.id)] = player
                 self.skips[str(ctx.guild.id)] = False
@@ -184,10 +187,12 @@ class Audio(commands.Cog):
             if not ctx.voice_client.is_playing():
                 ctx.voice_client.play(
                     music,
-                    after=lambda e: self.bot.loop.create_task((self.play_next(ctx, e))),
+                    after=lambda e: self.bot.loop.create_task(
+                        (self.play_next(ctx, e))),
                 )
                 self.current_player[str(ctx.guild.id)].url = music.url
-                self.current_player[str(ctx.guild.id)].title = format(music.title)
+                self.current_player[str(ctx.guild.id)].title = format(
+                    music.title)
                 await ctx.send(f"Tocando **{music.title}**!!!!")
         else:
             print(
@@ -234,8 +239,7 @@ class Audio(commands.Cog):
         await self.voice(ctx)
         self.skips[str(ctx.guild.id)] = True
         if isinstance(ctx.guild, discord.Guild) and isinstance(
-            ctx.voice_client, discord.VoiceClient
-        ):
+                ctx.voice_client, discord.VoiceClient):
             if self.current_player[str(ctx.guild.id)].url == "":
                 await ctx.send("Não há nada tocando")
                 return
@@ -248,11 +252,8 @@ class Audio(commands.Cog):
         await self.voice(ctx)
         self.looping[str(ctx.guild.id)] = not self.looping[str(ctx.guild.id)]
 
-        await ctx.send(
-            "Música sendo repetida!"
-            if self.looping[str(ctx.guild.id)]
-            else "Música não está mais sendo repetida!"
-        )
+        await ctx.send("Música sendo repetida!" if self.looping[str(
+            ctx.guild.id)] else "Música não está mais sendo repetida!")
 
     @commands.command()
     async def pause(self, ctx: Context):
@@ -315,19 +316,20 @@ class Audio(commands.Cog):
                 await ctx.author.voice.channel.connect()
             else:
                 await ctx.send("Você não está conectado em um canal de voz")
-                raise commands.CommandError("Author not connected to a voice channel.")
+                raise commands.CommandError(
+                    "Author not connected to a voice channel.")
         else:
             if ctx.author.voice:
                 if ctx.voice_client.channel != ctx.author.voice.channel:
                     await ctx.send(
                         "Você não está conectado em um canal de voz ou\
-                         o bot está em outro canal de voz"
-                    )
+                         o bot está em outro canal de voz")
                     raise commands.CommandError(
-                        "Author not connected to a voice channel."
-                    )
+                        "Author not connected to a voice channel.")
         if not self.check_voice(ctx):
-            raise commands.CommandError("Bot not connected to a voice channel.")
+            raise commands.CommandError(
+                "Bot not connected to a voice channel.")
+
 
 def setup(client):
-	client.add_cog(Audio(client))
+    client.add_cog(Audio(client))

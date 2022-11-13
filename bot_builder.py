@@ -1,10 +1,12 @@
 import asyncio
-from typing import Type
+from typing import Type, TypeVar
+
 import discord
 from discord.ext import commands
-from typing import TypeVar
+
 
 class BotBuilder:
+
     def __init__(self) -> None:
         """
         Initialize the bot.
@@ -16,8 +18,9 @@ class BotBuilder:
             case_insensitive=True,
             intents=intents,
         )
+        self.loop: asyncio.AbstractEventLoop() = asyncio.new_event_loop()
 
-    async def add_cog(self: TypeVar("BotBuilder"), cog: Type[commands.Cog]):
+    def add_cog(self: TypeVar("BotBuilder"), cog: Type[commands.Cog]):
         """
         Adds a cog to the bot.
 
@@ -25,7 +28,7 @@ class BotBuilder:
             self: The bot.
             cog: The cog to add.
         """
-        await self.bot.add_cog(cog(self.bot))
+        self.loop.run_until_complete(self.bot.add_cog(cog(self.bot)))
 
     def remove_cog(self, cog_name: str):
         self.bot.remove_cog(cog_name)
