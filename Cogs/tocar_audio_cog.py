@@ -31,6 +31,10 @@ class Music:
     url: str = ""
     title: str = ""
 
+    def __init__(self, url: str = "", title: str = ""):
+        self.url = url
+        self.title = title
+
     @classmethod
     def from_url(cls, url: str) -> [TypeVar("Music")]:
         """
@@ -55,7 +59,7 @@ class Music:
                 music.title = data["title"]
                 result.append(music)
                 return result
-        return []
+        return result
 
     def __str__(self) -> str:
         return f"{self.title}"
@@ -228,7 +232,7 @@ class Audio(commands.Cog):
             if len(self.players[str(ctx.guild.id)]) > 0:
                 text += "Fila:\n"
                 for i, music in enumerate(self.players[str(ctx.guild.id)]):
-                    text += f" {i}. __{music}__\n"
+                    text += f" {i}. __{music.title}__\n"
             await ctx.send(text)
         else:
             await ctx.send("Não há músicas na fila!")
@@ -296,8 +300,11 @@ class Audio(commands.Cog):
     async def clear(self, ctx: Context):
         """Limpa a fila de músicas"""
         await self.voice(ctx)
-        self.players[str(ctx.guild.id)] = []
-        await ctx.send("Fila limpa!")
+        if self.players[str(ctx.guild.id)] == []:
+            await ctx.send("A fila está vazia!")
+        else:
+            self.players[str(ctx.guild.id)] = []
+            await ctx.send("Fila limpa!")
 
     @commands.command()
     async def leave(self, ctx: Context):

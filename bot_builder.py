@@ -1,5 +1,5 @@
 import asyncio
-from typing import Type, TypeVar
+from typing import Type, TypeVar, Union
 
 import discord
 from discord.ext import commands

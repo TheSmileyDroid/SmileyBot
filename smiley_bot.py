@@ -1,16 +1,17 @@
+import asyncio
 import os
+from typing import List
 
 import discord
 
 from app import keep_alive
 from bot_builder import BotBuilder
-import asyncio
-
 from Cogs import (default_cog, falar_cog, math_cog, reddit_cog, rpg_cog,
                   script_cog, tocar_audio_cog)
 
+# Load opus
 discord.opus.load_opus("./libopus.so.0.8.0")
-bot = BotBuilder()
+bot: BotBuilder = BotBuilder()
 
 if __name__ == "__main__":
     # Add cogs
