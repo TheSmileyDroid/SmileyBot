@@ -7,5 +7,10 @@
     "python.linting.banditEnabled": true,
     "python.linting.prospectorEnabled": false,
     "editor.tabCompletion": "on",
-    "diffEditor.codeLens": true
+    "diffEditor.codeLens": true,
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

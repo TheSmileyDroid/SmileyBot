@@ -24,7 +24,7 @@ def safe_eval(s: str) -> float:
     """
 
     def checkmath(x, *args):
-        if x not in [x for x in dir(math) if not "__" in x]:
+        if x not in [x for x in dir(math) if "__" not in x]:
             raise SyntaxError(f"Unknown func {x}()")
         fun = getattr(math, x)
         return fun(*args)
@@ -62,30 +62,26 @@ def safe_eval(s: str) -> float:
             return node.value
         elif isinstance(node, ast.BinOp):
             logger.debug("BinOp")
-            if isinstance(node.left, ops):
-                left = _eval(node.left)
-            else:
-                left = node.left.value
-            if isinstance(node.right, ops):
-                right = _eval(node.right)
-            else:
-                right = node.right.value
-            return binOps[type(node.op)](left, right)
+            left = _eval(node.left) if isinstance(
+                node.left, ops) else node.left.value  # type: ignore
+            right = _eval(node.right) if isinstance(
+                node.right, ops) else node.right.value  # type: ignore
+            return binOps[type(node.op)](left, right)  # type: ignore
         elif isinstance(node, ast.UnaryOp):
             logger.debug("UpOp")
             if isinstance(node.operand, ops):
                 operand = _eval(node.operand)
             else:
-                operand = node.operand.value
-            return unOps[type(node.op)](operand)
+                operand = node.operand.value  # type: ignore
+            return unOps[type(node.op)](operand)  # type: ignore
         elif isinstance(node, ast.Call):
             args = [_eval(x) for x in node.args]
-            r = checkmath(node.func.id, *args)
+            r = checkmath(node.func.id, *args)  # type: ignore
             return r
         else:
             raise SyntaxError(f"Bad syntax, {type(node)}")
 
-    return _eval(tree)
+    return _eval(tree)  # type: ignore
 
 
 class Math(commands.Cog):

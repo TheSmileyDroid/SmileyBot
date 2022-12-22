@@ -6,8 +6,8 @@ import discord
 
 from app import keep_alive
 from bot_builder import BotBuilder
-from Cogs import (default_cog, falar_cog, math_cog, reddit_cog, rpg_cog,
-                  script_cog, tocar_audio_cog)
+from src.cogs import (default_cog, falar_cog, math_cog, reddit_cog, rpg_cog,
+                      script_cog, tocar_audio_cog, natal_cog)
 
 # Load opus
 discord.opus.load_opus("./libopus.so.0.8.0")
@@ -22,6 +22,7 @@ if __name__ == "__main__":
     bot.add_cog(rpg_cog.RPG)
     bot.add_cog(script_cog.Script)
     bot.add_cog(tocar_audio_cog.Audio)
+    bot.add_cog(natal_cog.Natal)
 
     # Connect
     bot.run(os.environ["DISCORD_ID"])
