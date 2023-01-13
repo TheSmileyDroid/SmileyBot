@@ -28,7 +28,7 @@ class BotBuilder:
             self: The bot.
             cog: The cog to add.
         """
-        self.bot.add_cog(cog(self.bot))
+        asyncio.run_until_complete(self.bot.add_cog(cog(self.bot)))
 
     def remove_cog(self, cog_name: str):
         self.bot.remove_cog(cog_name)  # type: ignore
