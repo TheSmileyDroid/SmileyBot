@@ -1,0 +1,25 @@
+Sorriso Fake -> Nicolas Fake
+Nicolas Fake -> Lucas Fake
+Lucas Fake -> Sorriso Fake
+Café -> Sorriso
+Sorriso -> Lucas
+Lucas -> Cap
+Cap -> Cadu
+Cadu -> Nicolas
+Nicolas -> Ghost
+Ghost -> Arcadia
+Arcadia -> Eike
+Eike -> Renato
+Renato -> Gukase
+Gukase -> Café
+Gukase -> Café
+Café -> Cadu
+Cadu -> Renato
+Renato -> Eike
+Eike -> Ghost
+Ghost -> Lucas
+Lucas -> Cap
+Cap -> Arcadia
+Arcadia -> Sorriso
+Sorriso -> Nicolas
+Nicolas -> Gukase

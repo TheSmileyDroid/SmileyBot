@@ -63,3 +63,34 @@ dia, espero que se divirtam, esperamos todos no dia do amigo secreto.')
                 return
 
         await ctx.send('Amigo secretos sorteados com sucesso!')
+
+    @commands.command()
+    async def send_again(self, ctx: Context):
+        """Envia novamente para todos os usuários"""
+        with open('amigos.txt', 'r') as file:
+            for line in file:
+                user_name = line.split('->')[0].strip()
+                amigos = [
+                    Amigo('Nicolas', '0'),
+                    Amigo('Renato', '463820210328305684'),
+                    Amigo('Lucas', '0'),
+                    Amigo('Sorriso', '439894995890208768'),
+                    Amigo('Cadu', '0'),
+                    Amigo('Arcadia', '0'),
+                    Amigo('Café', '0'),
+                    Amigo('Cap', '0'),
+                    Amigo('Ghost', '463820210328305684'),
+                    Amigo('Gukase', '0'),
+                    Amigo('Eike', '0'),
+                ]
+                user_id = next(
+                    (amigo.id for amigo in amigos if amigo.nome == user_name),
+                    None)
+                if user_id is None:
+                    await ctx.send('Usuário não encontrado')
+                    continue
+                user = self.get_user(ctx, user_id)
+                if user is None:
+                    await ctx.send('Usuário não encontrado')
+                    continue
+                await user.send(line)

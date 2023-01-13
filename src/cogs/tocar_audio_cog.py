@@ -22,7 +22,7 @@ ytdl_format_options = {
     "source_address": "0.0.0.0",  # bind to ipv4
 }
 
-ffmpeg_options = {"options": "-vn"}
+ffmpeg_options = {"options": "-vn", 'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'}
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
@@ -273,6 +273,8 @@ class Audio(commands.Cog):
     async def resume(self, ctx: Context):
         """Resume a música atual"""
         await self.voice(ctx)
+        if ctx.voice_client is None:
+            return await ctx.send("Não há nada tocando!")
         if ctx.voice_client.is_paused():
             ctx.voice_client.resume()
             await ctx.send("Música resumida!")
@@ -283,6 +285,8 @@ class Audio(commands.Cog):
     async def shuffle(self, ctx: Context):
         """Embaralha a fila de músicas"""
         await self.voice(ctx)
+        if ctx.guild is None:
+            raise commands.NoPrivateMessage()
         random.shuffle(self.players[str(ctx.guild.id)])
         await ctx.send("Fila embaralhada!")
 
@@ -290,6 +294,8 @@ class Audio(commands.Cog):
     async def remove(self, ctx: Context, index: int):
         """Remove uma música da fila"""
         await self.voice(ctx)
+        if ctx.guild is None:
+            raise commands.NoPrivateMessage()
         if index > len(self.players[str(ctx.guild.id)]) - 1:
             await ctx.send("Index inválido!")
             return
@@ -300,6 +306,8 @@ class Audio(commands.Cog):
     async def clear(self, ctx: Context):
         """Limpa a fila de músicas"""
         await self.voice(ctx)
+        if ctx.guild is None:
+            raise commands.NoPrivateMessage()
         if self.players[str(ctx.guild.id)] == []:
             await ctx.send("A fila está vazia!")
         else:
@@ -310,13 +318,15 @@ class Audio(commands.Cog):
     async def leave(self, ctx: Context):
         """Desconecta o bot do canal de voz"""
         await self.voice(ctx)
-        await ctx.voice_client.disconnect()
-        self.players[str(ctx.guild.id)] = []
-        self.current_player[str(ctx.guild.id)].url = ""
-        self.current_player[str(ctx.guild.id)].title = ""
-        await ctx.send("Desconectado!")
+        if isinstance(ctx.guild, discord.Guild) and isinstance(
+                ctx.voice_client, discord.VoiceClient):
+            await ctx.voice_client.disconnect()
+            self.players[str(ctx.guild.id)] = []
+            self.current_player[str(ctx.guild.id)].url = ""
+            self.current_player[str(ctx.guild.id)].title = ""
+            await ctx.send("Desconectado!")
 
-    async def voice(self, ctx):
+    async def voice(self, ctx: Context):
         """Conecta o bot ao canal de voz"""
         if ctx.voice_client is None:
             if ctx.author.voice:
@@ -325,14 +335,12 @@ class Audio(commands.Cog):
                 await ctx.send("Você não está conectado em um canal de voz")
                 raise commands.CommandError(
                     "Author not connected to a voice channel.")
-        else:
-            if ctx.author.voice:
-                if ctx.voice_client.channel != ctx.author.voice.channel:
-                    await ctx.send(
-                        "Você não está conectado em um canal de voz ou\
+        elif (ctx.author.voice
+              and ctx.voice_client.channel != ctx.author.voice.channel):
+            await ctx.send("Você não está conectado em um canal de voz ou\
                          o bot está em outro canal de voz")
-                    raise commands.CommandError(
-                        "Author not connected to a voice channel.")
+            raise commands.CommandError(
+                "Author not connected to a voice channel.")
         if not self.check_voice(ctx):
             raise commands.CommandError(
                 "Bot not connected to a voice channel.")
