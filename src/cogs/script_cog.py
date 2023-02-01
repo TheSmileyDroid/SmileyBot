@@ -158,10 +158,13 @@ end\n\
                             f'**Scripts:** Executando comando {line.split(" ")[0]}'
                         )
                         command, args = line.split(" ", 1)
-                        await ctx.invoke(self.bot.get_command(command), args)
+                        await ctx.invoke(self.bot.get_command(command),
+                                         args=args)
             except Exception as e:
+                command, args = line.split(" ", 1)
                 await ctx.send(
-                    f"**Scripts:** Erro ao executar script {script_name}: {e}")
+                    f"**Scripts:** Erro ao executar script {command} com os argumentos {args}: {e}"
+                )
                 return
         else:
             await ctx.send(f"**Scripts:** Script {script_name} não encontrado."

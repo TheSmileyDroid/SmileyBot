@@ -22,7 +22,11 @@ ytdl_format_options = {
     "source_address": "0.0.0.0",  # bind to ipv4
 }
 
-ffmpeg_options = {"options": "-vn", 'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'}
+ffmpeg_options = {
+    "options": "-vn",
+    'before_options':
+    '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5'
+}
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
@@ -36,14 +40,14 @@ class Music:
         self.title = title
 
     @classmethod
-    def from_url(cls, url: str) -> [TypeVar("Music")]:
+    def from_url(cls, url: str):
         """
         This function is used to get the music from the url.
         :param cls:
         :param url:
         :return:
         """
-        result: [Music] = []
+        result = []
         data = ytdl.extract_info(url, download=False)
         if isinstance(data, dict):
             if "entries" in data:
