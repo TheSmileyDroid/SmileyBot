@@ -5,7 +5,9 @@ from discord.ext import commands
 from discord.ext.commands.context import Context
 from typing import TypeVar
 
+
 class Script(commands.Cog):
+
     def __init__(self, bot: commands.Bot) -> None:
         print()
         self.bot = bot
@@ -48,8 +50,7 @@ class Script(commands.Cog):
         ```
         """
         if script == "help":
-            await ctx.send(
-                "\
+            await ctx.send("\
 **Executa uma série de comandos**\n\
 \n\
 Exemplo:\n\
@@ -68,8 +69,7 @@ end\n\
 \n\
 -run exemplo\n\
 ```\n\
-                "
-            )
+                ")
             return
 
         if script == "list":
@@ -94,13 +94,12 @@ end\n\
             return
 
         if script.startswith("import "):
-            script_name = script[7 : script.find("\n", 7)]
-            script_code = script[script.find("```") + 3 : script.rfind("```")]
+            script_name = script[7:script.find("\n", 7)]
+            script_code = script[script.find("```") + 3:script.rfind("```")]
             self.scripts[ctx.author.id][script_name] = script_code.split("\n")
             # Remove todos os comando vazios ('') do script
             self.scripts[ctx.author.id][script_name] = list(
-                filter(None, self.scripts[ctx.author.id][script_name])
-            )
+                filter(None, self.scripts[ctx.author.id][script_name]))
             await ctx.send(
                 f"**Scripts:** Script {script_name} importado como {self.scripts[ctx.author.id][script_name]}."
             )
@@ -121,17 +120,17 @@ end\n\
                 self.scripts = self.scripts[:-1]
                 return
             script_name = self.editing[message.author.id]
-            self.scripts[message.author.id][script_name].append(message.content)
+            self.scripts[message.author.id][script_name].append(
+                message.content)
             await message.delete()
             result = "\n".join(self.scripts[message.author.id][script_name])
             if message.author.id in self.bot_msg:
-                await self.bot_msg[message.author.id].edit(
-                    content=result + "\n\n_Esperando..._"
-                )
+                await self.bot_msg[message.author.id
+                                   ].edit(content=result + "\n\n_Esperando..._"
+                                          )
             else:
                 self.bot_msg[message.author.id] = await message.channel.send(
-                    result + "\n\n_Esperando..._"
-                )
+                    result + "\n\n_Esperando..._")
             return
 
     @commands.command(name="run", help="Executa um script")
@@ -155,18 +154,19 @@ end\n\
                     elif line.startswith("wait "):
                         await asyncio.sleep(int(line[5:]))
                     else:
-                        print(f'**Scripts:** Executando comando {line.split(" ")[0]}')
-                        await ctx.invoke(
-                            self.bot.get_command(line.split(" ")[0]),
-                            *line.split(" ")[1:],
+                        print(
+                            f'**Scripts:** Executando comando {line.split(" ")[0]}'
                         )
+                        command, args = line.split(" ", 1)
+                        await ctx.invoke(self.bot.get_command(command), args)
             except Exception as e:
                 await ctx.send(
-                    f"**Scripts:** Erro ao executar script {script_name}: {e}"
-                )
+                    f"**Scripts:** Erro ao executar script {script_name}: {e}")
                 return
         else:
-            await ctx.send(f"**Scripts:** Script {script_name} não encontrado.")
+            await ctx.send(f"**Scripts:** Script {script_name} não encontrado."
+                           )
+
 
 def setup(client):
-	client.add_cog(Script(client))
+    client.add_cog(Script(client))
